@@ -13,7 +13,7 @@ function getNextActiveIdxMap(prevActiveIdxMap, rule) {
 		throw new Error('Only even numbered automata supported at this time')
 	}
 
-	const prevActiveIdxs = _.sortBy(Object.keys(prevActiveIdxMap), key => +key)
+	const prevActiveIdxs = _.sortBy(Object.keys(prevActiveIdxMap).map(key => +key))
 	const firstActiveIdx = _.first(prevActiveIdxs)
 	const lastActiveIdx = _.last(prevActiveIdxs)
 	const getPrevBitForIdx = (idx) => getBitForIdx(idx, prevActiveIdxMap)
