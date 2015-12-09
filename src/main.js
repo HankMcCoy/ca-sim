@@ -55,7 +55,10 @@ Board.propTypes = {
 
 const Controls = ({ rule, onRuleChange, step, reset }) => (
 	<Block>
-		<input type="text" value={rule} onChange={onRuleChange} />
+		<label>
+			Rule:
+			<input type="text" value={rule} onChange={onRuleChange} />
+		</label>
 		<button
 			style={{
 				width: '120px',
