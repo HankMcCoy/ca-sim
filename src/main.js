@@ -9,6 +9,10 @@ const cellSize = '5px'
 const boardSize = 200
 
 function getNextActiveIdxMap(prevActiveIdxMap, rule) {
+	if (rule % 2 === 1) {
+		throw new Error('Only even numbered automata supported at this time')
+	}
+
 	const prevActiveIdxs = _.sortBy(Object.keys(prevActiveIdxMap), key => +key)
 	const firstActiveIdx = _.first(prevActiveIdxs)
 	const lastActiveIdx = _.last(prevActiveIdxs)
