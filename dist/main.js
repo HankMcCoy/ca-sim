@@ -19671,13 +19671,17 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _reactDom = __webpack_require__(158);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
 	var _jsxstyle = __webpack_require__(162);
 
 	var _board = __webpack_require__(173);
 
 	var _board2 = _interopRequireDefault(_board);
 
-	var _controls = __webpack_require__(174);
+	var _controls = __webpack_require__(177);
 
 	var _controls2 = _interopRequireDefault(_controls);
 
@@ -19703,6 +19707,7 @@
 
 			_this.state = {
 				rule: 110,
+				width: undefined,
 				stepInterval: undefined,
 				gameState: [{ '0': true }]
 			};
@@ -19718,6 +19723,7 @@
 				var gameState = _state.gameState;
 				var rule = _state.rule;
 				var stepInterval = _state.stepInterval;
+				var width = _state.width;
 
 				return _react2.default.createElement(
 					_jsxstyle.Block,
@@ -19737,8 +19743,26 @@
 						toggleStepping: function toggleStepping() {
 							_this2.toggleStepping();
 						} }),
-					_react2.default.createElement(_board2.default, { gameState: gameState })
+					_react2.default.createElement(_board2.default, { gameState: gameState, width: width })
 				);
+			}
+		}, {
+			key: 'componentDidMount',
+			value: function componentDidMount() {
+				var _this3 = this;
+
+				this.resetWidth();
+
+				window.addEventListener('resize', _lodash2.default.debounce(function () {
+					_this3.resetWidth();
+				}, 1000));
+			}
+		}, {
+			key: 'resetWidth',
+			value: function resetWidth() {
+				this.setState({
+					width: _reactDom2.default.findDOMNode(this).offsetWidth
+				});
 			}
 		}, {
 			key: 'setRule',
@@ -19770,14 +19794,14 @@
 		}, {
 			key: 'toggleStepping',
 			value: function toggleStepping() {
-				var _this3 = this;
+				var _this4 = this;
 
 				var stepInterval = this.state.stepInterval;
 
 				if (stepInterval === undefined) {
 					this.setState({
 						stepInterval: setInterval(function () {
-							_this3.step();
+							_this4.step();
 						}, 16)
 					});
 				} else {
@@ -32593,7 +32617,7 @@
 
 	var _jsxstyle = __webpack_require__(162);
 
-	var _row = __webpack_require__(175);
+	var _row = __webpack_require__(174);
 
 	var _row2 = _interopRequireDefault(_row);
 
@@ -32603,12 +32627,24 @@
 
 	var Board = function Board(_ref) {
 		var gameState = _ref.gameState;
+		var width = _ref.width;
+
+		if (width === undefined) {
+			return _react2.default.createElement('div', null);
+		}
+
+		var cellSize = 3;
+		var numCells = Math.floor(width / cellSize);
 
 		return _react2.default.createElement(
 			_jsxstyle.Block,
 			null,
 			gameState.map(function (idxMap, idx) {
-				return _react2.default.createElement(_row2.default, { key: idx, activeIdxMap: idxMap });
+				return _react2.default.createElement(_row2.default, {
+					key: idx,
+					activeIdxMap: idxMap,
+					numCells: numCells,
+					cellSize: cellSize });
 			})
 		);
 	};
@@ -32621,6 +32657,128 @@
 
 /***/ },
 /* 174 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _jsxstyle = __webpack_require__(162);
+
+	var _cell = __webpack_require__(175);
+
+	var _cell2 = _interopRequireDefault(_cell);
+
+	var _propTypes = __webpack_require__(176);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Row = (function (_Component) {
+		_inherits(Row, _Component);
+
+		function Row() {
+			_classCallCheck(this, Row);
+
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(Row).apply(this, arguments));
+		}
+
+		_createClass(Row, [{
+			key: 'render',
+			value: function render() {
+				var _props = this.props;
+				var activeIdxMap = _props.activeIdxMap;
+				var numCells = _props.numCells;
+				var cellSize = _props.cellSize;
+
+				return _react2.default.createElement(
+					_jsxstyle.Block,
+					{ height: cellSize + 'px' },
+					_.range(Math.ceil(-numCells / 2), Math.floor(numCells / 2)).map(function (idx) {
+						return _react2.default.createElement(_cell2.default, { key: idx, isAlive: activeIdxMap[idx], size: cellSize });
+					})
+				);
+			}
+		}, {
+			key: 'shouldComponentUpdate',
+			value: function shouldComponentUpdate(nextProps) {
+				return nextProps.activeIdxMap !== this.props.activeIdxMap || nextProps.numCells !== this.props.numCells || nextProps.cellSize !== this.props.cellSize;
+			}
+		}]);
+
+		return Row;
+	})(_react.Component);
+
+	exports.default = Row;
+
+	Row.propTypes = {
+		activeIdxMap: _propTypes.activeIdxMapPropType
+	};
+
+/***/ },
+/* 175 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _jsxstyle = __webpack_require__(162);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Cell = function Cell(_ref) {
+		var isAlive = _ref.isAlive;
+		var size = _ref.size;
+		return _react2.default.createElement(_jsxstyle.Block, {
+			float: 'left',
+			width: size + 'px',
+			height: size + 'px',
+			background: isAlive ? '#000' : '#eee' });
+	};
+
+	Cell.propTypes = {
+		isAlive: _react.PropTypes.bool
+	};
+
+	exports.default = Cell;
+
+/***/ },
+/* 176 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.activeIdxMapPropType = undefined;
+
+	var _react = __webpack_require__(1);
+
+	var activeIdxMapPropType = exports.activeIdxMapPropType = _react.PropTypes.objectOf(_react.PropTypes.bool);
+
+/***/ },
+/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -32687,130 +32845,6 @@
 	};
 
 	exports.default = Controls;
-
-/***/ },
-/* 175 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _jsxstyle = __webpack_require__(162);
-
-	var _cell = __webpack_require__(177);
-
-	var _cell2 = _interopRequireDefault(_cell);
-
-	var _propTypes = __webpack_require__(176);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var boardSize = 400;
-
-	var Row = (function (_Component) {
-		_inherits(Row, _Component);
-
-		function Row() {
-			_classCallCheck(this, Row);
-
-			return _possibleConstructorReturn(this, Object.getPrototypeOf(Row).apply(this, arguments));
-		}
-
-		_createClass(Row, [{
-			key: 'render',
-			value: function render() {
-				var activeIdxMap = this.props.activeIdxMap;
-
-				return _react2.default.createElement(
-					_jsxstyle.Block,
-					{ height: _cell2.default.size },
-					_.range(Math.floor(-boardSize / 2), Math.floor(boardSize / 2)).map(function (idx) {
-						return _react2.default.createElement(_cell2.default, { key: idx, isAlive: activeIdxMap[idx] });
-					})
-				);
-			}
-		}, {
-			key: 'shouldComponentUpdate',
-			value: function shouldComponentUpdate(nextProps) {
-				return nextProps.activeIdxMap !== this.props.activeIdxMap;
-			}
-		}]);
-
-		return Row;
-	})(_react.Component);
-
-	exports.default = Row;
-
-	Row.propTypes = {
-		activeIdxMap: _propTypes.activeIdxMapPropType
-	};
-
-/***/ },
-/* 176 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.activeIdxMapPropType = undefined;
-
-	var _react = __webpack_require__(1);
-
-	var activeIdxMapPropType = exports.activeIdxMapPropType = _react.PropTypes.objectOf(_react.PropTypes.bool);
-
-/***/ },
-/* 177 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _jsxstyle = __webpack_require__(162);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var cellSize = '2px';
-
-	var Cell = function Cell(_ref) {
-		var isAlive = _ref.isAlive;
-		return _react2.default.createElement(_jsxstyle.Block, {
-			width: cellSize,
-			height: cellSize,
-			float: 'left',
-			background: isAlive ? '#000' : '#eee' });
-	};
-
-	Cell.propTypes = {
-		isAlive: _react.PropTypes.bool
-	};
-
-	Cell.size = cellSize;
-
-	exports.default = Cell;
 
 /***/ },
 /* 178 */

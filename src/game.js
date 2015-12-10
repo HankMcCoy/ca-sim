@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import React, { PropTypes, Component } from 'react'
+import ReactDOM from 'react-dom'
 import { Block } from 'jsxstyle'
 
 import Board from './components/board'
@@ -12,13 +13,14 @@ export default class Game extends Component {
 
 		this.state = {
 			rule: 110,
+			width: undefined,
 			stepInterval: undefined,
 			gameState: [{ '0': true }],
 		}
 	}
 
 	render() {
-		const { gameState, rule, stepInterval } = this.state
+		const { gameState, rule, stepInterval, width } = this.state
 
 		return (
 			<Block>
@@ -29,9 +31,23 @@ export default class Game extends Component {
 					step={() => { this.step() }}
 					isStepping={stepInterval !== undefined}
 					toggleStepping={() => { this.toggleStepping() }} />
-				<Board gameState={gameState} />
+				<Board gameState={gameState} width={width} />
 			</Block>
 		)
+	}
+
+	componentDidMount() {
+		this.resetWidth()
+
+		window.addEventListener('resize', _.debounce(() => {
+			this.resetWidth()
+		}, 1000))
+	}
+
+	resetWidth() {
+		this.setState({
+			width: ReactDOM.findDOMNode(this).offsetWidth
+		})
 	}
 
 	setRule(rule) {

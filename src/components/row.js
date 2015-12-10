@@ -4,23 +4,23 @@ import { Block } from 'jsxstyle'
 import Cell from './cell'
 import { activeIdxMapPropType } from '../prop-types'
 
-const boardSize = 400
-
 export default class Row extends Component {
 	render() {
-		const { activeIdxMap } = this.props
+		const { activeIdxMap, numCells, cellSize } = this.props
 
 		return (
-			<Block height={Cell.size}>
-				{_.range(Math.floor(-boardSize/2), Math.floor(boardSize/2)).map(idx => (
-					<Cell key={idx} isAlive={activeIdxMap[idx]} />
+			<Block height={`${cellSize}px`}>
+				{_.range(Math.ceil(-numCells/2), Math.floor(numCells/2)).map(idx => (
+					<Cell key={idx} isAlive={activeIdxMap[idx]} size={cellSize} />
 				))}
 			</Block>
 		)
 	}
 
 	shouldComponentUpdate(nextProps) {
-		return nextProps.activeIdxMap !== this.props.activeIdxMap
+		return nextProps.activeIdxMap !== this.props.activeIdxMap ||
+			nextProps.numCells !== this.props.numCells ||
+			nextProps.cellSize !== this.props.cellSize
 	}
 }
 
