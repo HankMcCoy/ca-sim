@@ -1,5 +1,17 @@
 # Cellular Automata Simulator
 
+## Description
+
 I'm planning on flushing this out to be a simple simulator of any of the 256 elementary one-dimensional [cellular automata](https://en.wikipedia.org/wiki/Elementary_cellular_automaton) (only 88 of which are unique) that can easily be dropped onto a webpack as a simple widget.
 
 ![Screenshot](http://i.imgur.com/vDLXi78.png)
+
+## Todos
+
+- [ ] Provide helpful validation messages for invalid automata (most notably odd numbered ones)
+- [ ] Add button to kick off steps on an interval (with accompanying stop button)
+- [ ] Add option to set/reset the initial state of the tape
+- [ ] Style to not look completely terrible
+- [ ] Reposition the viewport to match the output as it grows
+- [ ] Resize the cells once the output extends beyond the size of the viewport
+- [ ] Resize the board, rows, and cells, to best fit the available viewport space
