@@ -1,7 +1,14 @@
 import React, { PropTypes } from 'react'
 import { Block } from 'jsxstyle'
 
-const Controls = ({ rule, onRuleChange, step, reset }) => (
+const Controls = ({
+	rule,
+	onRuleChange,
+	step,
+	reset,
+	isStepping,
+	toggleStepping,
+}) => (
 	<Block>
 		<label>
 			Rule:
@@ -16,6 +23,16 @@ const Controls = ({ rule, onRuleChange, step, reset }) => (
 			}}
 			onClick={step}>
 			Step
+		</button>
+		<button
+			style={{
+				width: '120px',
+				height: '30px',
+				background: '#fff',
+				border: '1px solid #000',
+			}}
+			onClick={toggleStepping}>
+			{isStepping ? 'Stop' : 'Start'}
 		</button>
 	</Block>
 )

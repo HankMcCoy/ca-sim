@@ -12,12 +12,13 @@ export default class Game extends Component {
 
 		this.state = {
 			rule: 110,
+			stepInterval: undefined,
 			gameState: [{ '0': true }],
 		}
 	}
 
 	render() {
-		const { gameState, rule } = this.state
+		const { gameState, rule, stepInterval } = this.state
 
 		return (
 			<Block>
@@ -25,7 +26,9 @@ export default class Game extends Component {
 					rule={rule}
 					onRuleChange={(event) => this.setRule(event.target.value)}
 					reset={(initialState) => { this.reset(initialState) }}
-					step={() => { this.step() }} />
+					step={() => { this.step() }}
+					isStepping={stepInterval !== undefined}
+					toggleStepping={() => { this.toggleStepping() }} />
 				<Board gameState={gameState} />
 			</Block>
 		)
@@ -53,5 +56,19 @@ export default class Game extends Component {
 				getNextActiveIdxMap(_.last(state.gameState), state.rule)
 			)
 		}))
+	}
+
+	toggleStepping() {
+		const { stepInterval } = this.state
+
+		if (stepInterval === undefined) {
+			this.setState({
+				stepInterval: setInterval(() => { this.step() }, 16)
+			})
+		} else {
+			clearInterval(this.state.stepInterval)
+
+			this.setState({ stepInterval: undefined })
+		}
 	}
 }
