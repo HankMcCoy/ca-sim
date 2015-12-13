@@ -12,6 +12,6 @@ I'm planning on flushing this out to be a simple simulator of any of the 256 ele
 - [ ] Provide helpful validation messages for invalid automata (most notably odd numbered ones)
 - [ ] Add option to set/reset the initial state of the tape
 - [ ] Style to not look completely terrible
-- [ ] Reposition the viewport to match the output as it grows
-- [ ] Resize the cells once the output extends beyond the size of the viewport
-- [ ] Resize the board, rows, and cells, to best fit the available viewport space
+- [X] Reposition the viewport to match the output as it grows
+- [X] Resize the cells once the output extends beyond the size of the viewport
+- [ ] Switch to using canvas for rendering

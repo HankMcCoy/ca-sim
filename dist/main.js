@@ -32645,6 +32645,21 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	var minCellSize = 1;
+	var maxCellSize = 5;
+
+	function getMaximaActiveIdxs(gameState) {
+		var activeIdxs = Object.keys(_.last(gameState)).map(function (x) {
+			return parseInt(x, 10);
+		});
+		var sortedActiveIdxs = _.sortBy(activeIdxs);
+
+		return {
+			leftmostActiveIdx: _.first(sortedActiveIdxs),
+			rightmostActiveIdx: _.last(sortedActiveIdxs)
+		};
+	}
+
 	var Board = function Board(_ref) {
 		var gameState = _ref.gameState;
 		var width = _ref.width;
@@ -32653,8 +32668,23 @@
 			return _react2.default.createElement('div', null);
 		}
 
-		var cellSize = 3;
-		var numCells = Math.floor(width / cellSize);
+		// We should center the viewport at the mid-point between the leftmost and rightmost active cells.
+		// For the moment we'll just look at the most recent row. In the future we should expand to look at all rows
+		// since it is entirely possible the maxima may be earlier.
+		// We should also start tracking the maxima for each row separately
+
+		var _getMaximaActiveIdxs = getMaximaActiveIdxs(gameState);
+
+		var leftmostActiveIdx = _getMaximaActiveIdxs.leftmostActiveIdx;
+		var rightmostActiveIdx = _getMaximaActiveIdxs.rightmostActiveIdx;
+
+		var numCellsToTryToDisplay = rightmostActiveIdx - leftmostActiveIdx + 1;
+		var centerIdx = Math.round((rightmostActiveIdx + leftmostActiveIdx) / 2);
+		var cellSize = Math.floor(width / numCellsToTryToDisplay);
+		cellSize = Math.max(cellSize, minCellSize);
+		cellSize = Math.min(cellSize, maxCellSize);
+		var numCellsToActuallyDisplay = Math.floor(width / cellSize);
+		var startIdx = centerIdx - Math.floor(numCellsToActuallyDisplay / 2);
 
 		return _react2.default.createElement(
 			_jsxstyle.Block,
@@ -32663,7 +32693,8 @@
 				return _react2.default.createElement(_row2.default, {
 					key: idx,
 					activeIdxMap: idxMap,
-					numCells: numCells,
+					startIdx: startIdx,
+					numCells: numCellsToActuallyDisplay,
 					cellSize: cellSize });
 			})
 		);
@@ -32686,6 +32717,10 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
+
+	var _lodash = __webpack_require__(160);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
 
 	var _react = __webpack_require__(1);
 
@@ -32721,13 +32756,14 @@
 			value: function render() {
 				var _props = this.props;
 				var activeIdxMap = _props.activeIdxMap;
+				var startIdx = _props.startIdx;
 				var numCells = _props.numCells;
 				var cellSize = _props.cellSize;
 
 				return _react2.default.createElement(
 					_jsxstyle.Block,
 					{ height: cellSize + 'px' },
-					_.range(Math.ceil(-numCells / 2), Math.floor(numCells / 2)).map(function (idx) {
+					_lodash2.default.range(startIdx, startIdx + numCells).map(function (idx) {
 						return _react2.default.createElement(_cell2.default, { key: idx, isAlive: activeIdxMap[idx], size: cellSize });
 					})
 				);
@@ -32735,7 +32771,7 @@
 		}, {
 			key: 'shouldComponentUpdate',
 			value: function shouldComponentUpdate(nextProps) {
-				return nextProps.activeIdxMap !== this.props.activeIdxMap || nextProps.numCells !== this.props.numCells || nextProps.cellSize !== this.props.cellSize;
+				return !_lodash2.default.isEqual(this.props, nextProps);
 			}
 		}]);
 

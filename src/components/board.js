@@ -4,13 +4,36 @@ import { Block } from 'jsxstyle'
 import Row from './row'
 import { activeIdxMapPropType } from '../prop-types'
 
+const minCellSize = 1
+const maxCellSize = 5
+
+function getMaximaActiveIdxs(gameState) {
+	const activeIdxs = Object.keys(_.last(gameState)).map(x => parseInt(x, 10))
+	const sortedActiveIdxs = _.sortBy(activeIdxs)
+
+	return {
+		leftmostActiveIdx: _.first(sortedActiveIdxs),
+		rightmostActiveIdx: _.last(sortedActiveIdxs),
+	}
+}
+
 const Board = ({ gameState, width }) => {
 	if (width === undefined) {
 		return <div />
 	}
 
-	const cellSize = 3
-	const numCells = Math.floor(width / cellSize)
+	// We should center the viewport at the mid-point between the leftmost and rightmost active cells.
+	// For the moment we'll just look at the most recent row. In the future we should expand to look at all rows
+	// since it is entirely possible the maxima may be earlier.
+	// We should also start tracking the maxima for each row separately
+	const { leftmostActiveIdx, rightmostActiveIdx } = getMaximaActiveIdxs(gameState)
+	const numCellsToTryToDisplay = rightmostActiveIdx - leftmostActiveIdx + 1
+	const centerIdx = Math.round((rightmostActiveIdx + leftmostActiveIdx) / 2)
+	let cellSize = Math.floor(width / numCellsToTryToDisplay)
+	cellSize = Math.max(cellSize, minCellSize)
+	cellSize = Math.min(cellSize, maxCellSize)
+	const numCellsToActuallyDisplay = Math.floor(width / cellSize)
+	const startIdx = centerIdx - Math.floor(numCellsToActuallyDisplay / 2)
 
 	return (
 		<Block>
@@ -18,7 +41,8 @@ const Board = ({ gameState, width }) => {
 				<Row
 					key={idx}
 					activeIdxMap={idxMap}
-					numCells={numCells}
+					startIdx={startIdx}
+					numCells={numCellsToActuallyDisplay}
 					cellSize={cellSize} />
 			))}
 		</Block>
