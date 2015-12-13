@@ -2,12 +2,11 @@ import _ from 'lodash'
 import React, { PropTypes, Component } from 'react'
 import ReactDOM from 'react-dom'
 import { Block } from 'jsxstyle'
-import '!!style-loader!css-loader!../css/normalize.css'
-import '!!style-loader!css-loader!../css/skeleton.css'
 
 import Board from './components/board'
 import Controls from './components/controls'
 import getNextActiveIdxMap from './util/get-next-active-idx-map'
+import styles from './game.css'
 
 export default class Game extends Component {
 	constructor() {
@@ -32,11 +31,7 @@ export default class Game extends Component {
 		} = this.state
 
 		return (
-			<Block
-				padding="10px"
-				color="#555"
-				fontFamily="Helvetica, Arial"
-				fontSize="16px">
+			<Block className={styles.root}>
 				<Controls
 					initialState={initialState}
 					onInitialStateChange={(initialState) => this.setInitialState(initialState)}
