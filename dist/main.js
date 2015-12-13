@@ -32643,22 +32643,14 @@
 
 	var _propTypes = __webpack_require__(176);
 
+	var _getActiveIdxsMaxima2 = __webpack_require__(180);
+
+	var _getActiveIdxsMaxima3 = _interopRequireDefault(_getActiveIdxsMaxima2);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var minCellSize = 1;
 	var maxCellSize = 5;
-
-	function getMaximaActiveIdxs(gameState) {
-		var activeIdxs = Object.keys(_.last(gameState)).map(function (x) {
-			return parseInt(x, 10);
-		});
-		var sortedActiveIdxs = _.sortBy(activeIdxs);
-
-		return {
-			leftmostActiveIdx: _.first(sortedActiveIdxs),
-			rightmostActiveIdx: _.last(sortedActiveIdxs)
-		};
-	}
 
 	var Board = function Board(_ref) {
 		var gameState = _ref.gameState;
@@ -32673,10 +32665,10 @@
 		// since it is entirely possible the maxima may be earlier.
 		// We should also start tracking the maxima for each row separately
 
-		var _getMaximaActiveIdxs = getMaximaActiveIdxs(gameState);
+		var _getActiveIdxsMaxima = (0, _getActiveIdxsMaxima3.default)(_.last(gameState));
 
-		var leftmostActiveIdx = _getMaximaActiveIdxs.leftmostActiveIdx;
-		var rightmostActiveIdx = _getMaximaActiveIdxs.rightmostActiveIdx;
+		var leftmostActiveIdx = _getActiveIdxsMaxima.leftmostActiveIdx;
+		var rightmostActiveIdx = _getActiveIdxsMaxima.rightmostActiveIdx;
 
 		var numCellsToTryToDisplay = rightmostActiveIdx - leftmostActiveIdx + 1;
 		var centerIdx = Math.round((rightmostActiveIdx + leftmostActiveIdx) / 2);
@@ -32688,7 +32680,7 @@
 
 		return _react2.default.createElement(
 			_jsxstyle.Block,
-			null,
+			{ border: '1px solid #eee' },
 			gameState.map(function (idxMap, idx) {
 				return _react2.default.createElement(_row2.default, {
 					key: idx,
@@ -32734,6 +32726,10 @@
 
 	var _propTypes = __webpack_require__(176);
 
+	var _getActiveIdxsMaxima2 = __webpack_require__(180);
+
+	var _getActiveIdxsMaxima3 = _interopRequireDefault(_getActiveIdxsMaxima2);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -32741,6 +32737,15 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Spacer = function Spacer(_ref) {
+		var numCells = _ref.numCells;
+		var cellSize = _ref.cellSize;
+		return _react2.default.createElement(_jsxstyle.Block, {
+			float: 'left',
+			width: numCells * cellSize,
+			height: cellSize });
+	};
 
 	var Row = (function (_Component) {
 		_inherits(Row, _Component);
@@ -32760,10 +32765,18 @@
 				var numCells = _props.numCells;
 				var cellSize = _props.cellSize;
 
+				var _getActiveIdxsMaxima = (0, _getActiveIdxsMaxima3.default)(activeIdxMap);
+
+				var leftmostActiveIdx = _getActiveIdxsMaxima.leftmostActiveIdx;
+				var rightmostActiveIdx = _getActiveIdxsMaxima.rightmostActiveIdx;
+
 				return _react2.default.createElement(
 					_jsxstyle.Block,
 					{ height: cellSize + 'px' },
-					_lodash2.default.range(startIdx, startIdx + numCells).map(function (idx) {
+					_react2.default.createElement(Spacer, {
+						numCells: leftmostActiveIdx - startIdx,
+						cellSize: cellSize }),
+					_lodash2.default.range(leftmostActiveIdx, rightmostActiveIdx + 1).map(function (idx) {
 						return _react2.default.createElement(_cell2.default, { key: idx, isAlive: activeIdxMap[idx], size: cellSize });
 					})
 				);
@@ -32809,7 +32822,7 @@
 			float: 'left',
 			width: size + 'px',
 			height: size + 'px',
-			background: isAlive ? '#000' : '#eee' });
+			background: isAlive ? '#000' : 'transparent' });
 	};
 
 	Cell.propTypes = {
@@ -33000,6 +33013,35 @@
 
 			return nextActiveIdxMap;
 		}, {});
+	}
+
+/***/ },
+/* 180 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = getActiveIdxsMaxima;
+
+	var _lodash = __webpack_require__(160);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function getActiveIdxsMaxima(activeIdxMap) {
+		var activeIdxs = Object.keys(activeIdxMap).map(function (x) {
+			return parseInt(x, 10);
+		});
+		var sortedActiveIdxs = _lodash2.default.sortBy(activeIdxs);
+
+		return {
+			leftmostActiveIdx: _lodash2.default.first(sortedActiveIdxs),
+			rightmostActiveIdx: _lodash2.default.last(sortedActiveIdxs)
+		};
 	}
 
 /***/ }

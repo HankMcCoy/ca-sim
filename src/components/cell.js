@@ -6,7 +6,7 @@ const Cell = ({ isAlive, size }) => (
 		float={'left'}
 		width={`${size}px`}
 		height={`${size}px`}
-		background={isAlive ? '#000' : '#eee'} />
+		background={isAlive ? '#000' : 'transparent'} />
 )
 
 Cell.propTypes = {
