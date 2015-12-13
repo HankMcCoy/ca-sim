@@ -21,7 +21,6 @@ export default class Row extends Component {
 		const leftmostActiveIdx = _.first(sortedActiveIdxs)
 		const rightmostActiveIdx = _.last(sortedActiveIdxs)
 		const ranges = sortedActiveIdxs.reduce((ranges, idx) => {
-			// If this idx is adjacent to the previous range and the previous range was active, just
 			if (!ranges.length) {
 				return [{
 					start: idx,

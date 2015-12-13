@@ -2,6 +2,8 @@ import _ from 'lodash'
 import React, { PropTypes, Component } from 'react'
 import ReactDOM from 'react-dom'
 import { Block } from 'jsxstyle'
+import '!!style-loader!css-loader!../css/normalize.css'
+import '!!style-loader!css-loader!../css/skeleton.css'
 
 import Board from './components/board'
 import Controls from './components/controls'
@@ -30,7 +32,11 @@ export default class Game extends Component {
 		} = this.state
 
 		return (
-			<Block>
+			<Block
+				padding="10px"
+				color="#555"
+				fontFamily="Helvetica, Arial"
+				fontSize="16px">
 				<Controls
 					initialState={initialState}
 					onInitialStateChange={(initialState) => this.setInitialState(initialState)}

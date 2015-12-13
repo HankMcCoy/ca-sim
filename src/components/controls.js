@@ -1,7 +1,6 @@
 import React, { PropTypes } from 'react'
-import { Block } from 'jsxstyle'
 
-import Button from './button'
+import styles from './controls.css'
 
 const Controls = ({
 	initialState,
@@ -13,31 +12,33 @@ const Controls = ({
 	isStepping,
 	toggleStepping,
 }) => (
-	<Block>
-		<label>
-			Rule:
+	<div className={styles.root}>
+		<div className={styles.row}>
+			<label>Initial state:</label>
 			<input
 				type="text"
-				value={rule}
-				onChange={(event) => onRuleChange(event.target.value)} />
-		</label>
-		<label>
-			Initial state:
-			<input
-				type="text"
+				className="u-full-width"
 				value={initialState}
 				onChange={(event) => onInitialStateChange(event.target.value)} />
-		</label>
-		<Button onClick={reset}>
-			Reset
-		</Button>
-		<Button onClick={step}>
-			Step
-		</Button>
-		<Button onClick={toggleStepping}>
-			{isStepping ? 'Stop' : 'Start'}
-		</Button>
-	</Block>
+			<button className="u-full-width" onClick={reset}>
+				Reset
+			</button>
+		</div>
+		<div className={styles.row}>
+			<label>Rule:</label>
+			<input
+				type="text"
+				className="u-full-width"
+				value={rule}
+				onChange={(event) => onRuleChange(event.target.value)} />
+			<button className="u-full-width" onClick={step}>
+				Step
+			</button>
+			<button className="u-full-width button-primary" onClick={toggleStepping}>
+				{isStepping ? 'Stop' : 'Start'}
+			</button>
+		</div>
+	</div>
 )
 
 Controls.propTypes = {

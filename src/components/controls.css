@@ -1,0 +1,30 @@
+.root {
+	display: flex;
+	flex-direction: column;
+}
+
+.row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.row label {
+	flex: 0 0 90px;
+}
+
+.row input {
+	flex: auto;
+}
+
+.row button {
+	flex: 0 0 120px;
+}
+
+.row > * {
+	margin: 0;
+}
+
+.row > *:not(:last-child) {
+	margin-right: 10px;
+}
