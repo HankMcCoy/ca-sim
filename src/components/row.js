@@ -2,7 +2,6 @@ import _ from 'lodash'
 import React, { Component } from 'react'
 import { Block } from 'jsxstyle'
 
-import Cell from './cell'
 import { activeIdxMapPropType } from '../prop-types'
 import getSortedActiveIdxs from '../util/get-sorted-active-idxs'
 

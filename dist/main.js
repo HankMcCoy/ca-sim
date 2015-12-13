@@ -33042,10 +33042,6 @@
 
 	var _jsxstyle = __webpack_require__(162);
 
-	var _cell = __webpack_require__(181);
-
-	var _cell2 = _interopRequireDefault(_cell);
-
 	var _propTypes = __webpack_require__(182);
 
 	var _getSortedActiveIdxs = __webpack_require__(183);
@@ -33158,40 +33154,7 @@
 	};
 
 /***/ },
-/* 181 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _jsxstyle = __webpack_require__(162);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Cell = function Cell(_ref) {
-		var isAlive = _ref.isAlive;
-		var size = _ref.size;
-		return _react2.default.createElement(_jsxstyle.Block, {
-			float: 'left',
-			width: size + 'px',
-			height: size + 'px',
-			background: isAlive ? '#000' : 'transparent' });
-	};
-
-	Cell.propTypes = {
-		isAlive: _react.PropTypes.bool
-	};
-
-	exports.default = Cell;
-
-/***/ },
+/* 181 */,
 /* 182 */
 /***/ function(module, exports, __webpack_require__) {
 
