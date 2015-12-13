@@ -7,11 +7,15 @@ import getActiveIdxsMaxima from '../util/get-active-idxs-maxima'
 
 const minCellSize = 1
 const maxCellSize = 5
+const borderSize = 1
 
 const Board = ({ gameState, width }) => {
 	if (width === undefined) {
 		return <div />
 	}
+
+	// Don't include the border in the calculation of how much space is available to render in
+	width -= borderSize * 2
 
 	// We should center the viewport at the mid-point between the leftmost and rightmost active cells.
 	// For the moment we'll just look at the most recent row. In the future we should expand to look at all rows
@@ -27,7 +31,7 @@ const Board = ({ gameState, width }) => {
 	const startIdx = centerIdx - Math.floor(numCellsToActuallyDisplay / 2)
 
 	return (
-		<Block border="1px solid #eee">
+		<Block border={`${borderSize}px solid #eee`}>
 			{gameState.map((idxMap, idx) => (
 				<Row
 					key={idx}

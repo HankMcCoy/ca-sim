@@ -32969,6 +32969,7 @@
 
 	var minCellSize = 1;
 	var maxCellSize = 5;
+	var borderSize = 1;
 
 	var Board = function Board(_ref) {
 		var gameState = _ref.gameState;
@@ -32977,6 +32978,9 @@
 		if (width === undefined) {
 			return _react2.default.createElement('div', null);
 		}
+
+		// Don't include the border in the calculation of how much space is available to render in
+		width -= borderSize * 2;
 
 		// We should center the viewport at the mid-point between the leftmost and rightmost active cells.
 		// For the moment we'll just look at the most recent row. In the future we should expand to look at all rows
@@ -32998,7 +33002,7 @@
 
 		return _react2.default.createElement(
 			_jsxstyle.Block,
-			{ border: '1px solid #eee' },
+			{ border: borderSize + 'px solid #eee' },
 			gameState.map(function (idxMap, idx) {
 				return _react2.default.createElement(_row2.default, {
 					key: idx,
