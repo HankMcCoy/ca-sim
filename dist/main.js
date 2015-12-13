@@ -19773,7 +19773,7 @@
 			key: 'resetWidth',
 			value: function resetWidth() {
 				this.setState({
-					width: _reactDom2.default.findDOMNode(this).offsetWidth
+					width: parseInt(getComputedStyle(_reactDom2.default.findDOMNode(this)).width, 10)
 				});
 			}
 		}, {

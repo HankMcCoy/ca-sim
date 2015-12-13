@@ -56,7 +56,7 @@ export default class Game extends Component {
 
 	resetWidth() {
 		this.setState({
-			width: ReactDOM.findDOMNode(this).offsetWidth
+			width: parseInt(getComputedStyle(ReactDOM.findDOMNode(this)).width, 10)
 		})
 	}
 
