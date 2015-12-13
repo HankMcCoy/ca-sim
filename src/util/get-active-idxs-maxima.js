@@ -1,8 +1,9 @@
 import _ from 'lodash'
 
+import getSortedActiveIdxs from './get-sorted-active-idxs'
+
 export default function getActiveIdxsMaxima(activeIdxMap) {
-	const activeIdxs = Object.keys(activeIdxMap).map(x => parseInt(x, 10))
-	const sortedActiveIdxs = _.sortBy(activeIdxs)
+	const sortedActiveIdxs = getSortedActiveIdxs(activeIdxMap)
 
 	return {
 		leftmostActiveIdx: _.first(sortedActiveIdxs),

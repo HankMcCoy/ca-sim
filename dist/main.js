@@ -32726,9 +32726,9 @@
 
 	var _propTypes = __webpack_require__(176);
 
-	var _getActiveIdxsMaxima2 = __webpack_require__(180);
+	var _getSortedActiveIdxs = __webpack_require__(181);
 
-	var _getActiveIdxsMaxima3 = _interopRequireDefault(_getActiveIdxsMaxima2);
+	var _getSortedActiveIdxs2 = _interopRequireDefault(_getSortedActiveIdxs);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -32739,12 +32739,14 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var Spacer = function Spacer(_ref) {
-		var numCells = _ref.numCells;
-		var cellSize = _ref.cellSize;
+		var isActive = _ref.isActive;
+		var width = _ref.width;
+		var height = _ref.height;
 		return _react2.default.createElement(_jsxstyle.Block, {
 			float: 'left',
-			width: numCells * cellSize,
-			height: cellSize });
+			background: isActive ? '#000' : 'transparent',
+			width: width,
+			height: height });
 	};
 
 	var Row = (function (_Component) {
@@ -32765,19 +32767,54 @@
 				var numCells = _props.numCells;
 				var cellSize = _props.cellSize;
 
-				var _getActiveIdxsMaxima = (0, _getActiveIdxsMaxima3.default)(activeIdxMap);
+				var sortedActiveIdxs = (0, _getSortedActiveIdxs2.default)(activeIdxMap);
+				var leftmostActiveIdx = _lodash2.default.first(sortedActiveIdxs);
+				var rightmostActiveIdx = _lodash2.default.last(sortedActiveIdxs);
+				var ranges = sortedActiveIdxs.reduce(function (ranges, idx) {
+					// If this idx is adjacent to the previous range and the previous range was active, just
+					if (!ranges.length) {
+						return [{
+							start: idx,
+							length: 1,
+							isActive: true
+						}];
+					}
 
-				var leftmostActiveIdx = _getActiveIdxsMaxima.leftmostActiveIdx;
-				var rightmostActiveIdx = _getActiveIdxsMaxima.rightmostActiveIdx;
+					var prevRange = _lodash2.default.last(ranges);
+					var nextRangeStart = prevRange.start + prevRange.length;
+
+					if (nextRangeStart === idx) {
+						prevRange.length += 1;
+					} else {
+						ranges.push({
+							start: nextRangeStart,
+							length: idx - nextRangeStart,
+							isActive: false
+						});
+
+						ranges.push({
+							start: idx,
+							length: 1,
+							isActive: true
+						});
+					}
+
+					return ranges;
+				}, []);
 
 				return _react2.default.createElement(
 					_jsxstyle.Block,
 					{ height: cellSize + 'px' },
 					_react2.default.createElement(Spacer, {
-						numCells: leftmostActiveIdx - startIdx,
-						cellSize: cellSize }),
-					_lodash2.default.range(leftmostActiveIdx, rightmostActiveIdx + 1).map(function (idx) {
-						return _react2.default.createElement(_cell2.default, { key: idx, isAlive: activeIdxMap[idx], size: cellSize });
+						isActive: false,
+						width: (leftmostActiveIdx - startIdx) * cellSize,
+						height: cellSize }),
+					ranges.map(function (range, idx) {
+						return _react2.default.createElement(Spacer, {
+							key: idx,
+							isActive: range.isActive,
+							width: range.length * cellSize,
+							height: cellSize });
 					})
 				);
 			}
@@ -33030,18 +33067,43 @@
 
 	var _lodash2 = _interopRequireDefault(_lodash);
 
+	var _getSortedActiveIdxs = __webpack_require__(181);
+
+	var _getSortedActiveIdxs2 = _interopRequireDefault(_getSortedActiveIdxs);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function getActiveIdxsMaxima(activeIdxMap) {
-		var activeIdxs = Object.keys(activeIdxMap).map(function (x) {
-			return parseInt(x, 10);
-		});
-		var sortedActiveIdxs = _lodash2.default.sortBy(activeIdxs);
+		var sortedActiveIdxs = (0, _getSortedActiveIdxs2.default)(activeIdxMap);
 
 		return {
 			leftmostActiveIdx: _lodash2.default.first(sortedActiveIdxs),
 			rightmostActiveIdx: _lodash2.default.last(sortedActiveIdxs)
 		};
+	}
+
+/***/ },
+/* 181 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = getSortedActiveIdxs;
+
+	var _lodash = __webpack_require__(160);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function getSortedActiveIdxs(activeIdxMap) {
+		var activeIdxs = Object.keys(activeIdxMap).map(function (x) {
+			return parseInt(x, 10);
+		});
+		return _lodash2.default.sortBy(activeIdxs);
 	}
 
 /***/ }

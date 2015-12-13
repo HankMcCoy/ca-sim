@@ -4,27 +4,66 @@ import { Block } from 'jsxstyle'
 
 import Cell from './cell'
 import { activeIdxMapPropType } from '../prop-types'
-import getActiveIdxsMaxima from '../util/get-active-idxs-maxima'
+import getSortedActiveIdxs from '../util/get-sorted-active-idxs'
 
-const Spacer = ({ numCells, cellSize }) => (
+const Spacer = ({ isActive, width, height }) => (
 	<Block
 		float="left"
-		width={numCells * cellSize}
-		height={cellSize} />
+		background={isActive ? '#000' : 'transparent'}
+		width={width}
+		height={height} />
 )
 
 export default class Row extends Component {
 	render() {
 		const { activeIdxMap, startIdx, numCells, cellSize } = this.props
-		const { leftmostActiveIdx, rightmostActiveIdx } = getActiveIdxsMaxima(activeIdxMap)
+		const sortedActiveIdxs = getSortedActiveIdxs(activeIdxMap)
+		const leftmostActiveIdx = _.first(sortedActiveIdxs)
+		const rightmostActiveIdx = _.last(sortedActiveIdxs)
+		const ranges = sortedActiveIdxs.reduce((ranges, idx) => {
+			// If this idx is adjacent to the previous range and the previous range was active, just
+			if (!ranges.length) {
+				return [{
+					start: idx,
+					length: 1,
+					isActive: true
+				}]
+			}
+
+			const prevRange = _.last(ranges)
+			const nextRangeStart = prevRange.start + prevRange.length
+
+			if (nextRangeStart === idx) {
+				prevRange.length += 1
+			} else {
+				ranges.push({
+					start: nextRangeStart,
+					length: idx - (nextRangeStart),
+					isActive: false,
+				})
+
+				ranges.push({
+					start: idx,
+					length: 1,
+					isActive: true,
+				})
+			}
+
+			return ranges
+		}, [])
 
 		return (
 			<Block height={`${cellSize}px`}>
 				<Spacer
-					numCells={leftmostActiveIdx - startIdx}
-					cellSize={cellSize} />
-				{_.range(leftmostActiveIdx, rightmostActiveIdx + 1).map(idx => (
-					<Cell key={idx} isAlive={activeIdxMap[idx]} size={cellSize} />
+					isActive={false}
+					width={(leftmostActiveIdx - startIdx) * cellSize}
+					height={cellSize} />
+				{ranges.map((range, idx) => (
+					<Spacer
+						key={idx}
+						isActive={range.isActive}
+						width={range.length * cellSize}
+						height={cellSize} />
 				))}
 			</Block>
 		)
