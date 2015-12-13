@@ -33089,7 +33089,9 @@
 				var numCells = _props.numCells;
 				var cellSize = _props.cellSize;
 
-				var sortedActiveIdxs = (0, _getSortedActiveIdxs2.default)(activeIdxMap);
+				var sortedActiveIdxs = (0, _getSortedActiveIdxs2.default)(activeIdxMap).filter(function (idx) {
+					return idx >= startIdx && idx < startIdx + numCells;
+				});
 				var leftmostActiveIdx = _lodash2.default.first(sortedActiveIdxs);
 				var rightmostActiveIdx = _lodash2.default.last(sortedActiveIdxs);
 				var ranges = sortedActiveIdxs.reduce(function (ranges, idx) {

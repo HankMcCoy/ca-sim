@@ -18,6 +18,7 @@ export default class Row extends Component {
 	render() {
 		const { activeIdxMap, startIdx, numCells, cellSize } = this.props
 		const sortedActiveIdxs = getSortedActiveIdxs(activeIdxMap)
+			.filter(idx => idx >= startIdx && idx < startIdx + numCells)
 		const leftmostActiveIdx = _.first(sortedActiveIdxs)
 		const rightmostActiveIdx = _.last(sortedActiveIdxs)
 		const ranges = sortedActiveIdxs.reduce((ranges, idx) => {
