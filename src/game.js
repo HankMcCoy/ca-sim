@@ -12,6 +12,7 @@ export default class Game extends Component {
 		super()
 
 		this.state = {
+			initialState: '1',
 			rule: 110,
 			width: undefined,
 			stepInterval: undefined,
@@ -20,14 +21,22 @@ export default class Game extends Component {
 	}
 
 	render() {
-		const { gameState, rule, stepInterval, width } = this.state
+		const {
+			initialState,
+			gameState,
+			rule,
+			stepInterval,
+			width,
+		} = this.state
 
 		return (
 			<Block>
 				<Controls
+					initialState={initialState}
+					onInitialStateChange={(initialState) => this.setInitialState(initialState)}
 					rule={rule}
-					onRuleChange={(event) => this.setRule(event.target.value)}
-					reset={(initialState) => { this.reset(initialState) }}
+					onRuleChange={(rule) => this.setRule(rule)}
+					reset={() => { this.reset() }}
 					step={() => { this.step() }}
 					isStepping={stepInterval !== undefined}
 					toggleStepping={() => { this.toggleStepping() }} />
@@ -59,10 +68,24 @@ export default class Game extends Component {
 		this.setState({ rule })
 	}
 
-	reset(initialState) {
+	reset() {
+		const { initialState } = this.state
+		const activeIdxs = initialState
+			.split('')
+			.reduce((map, val, idx) => (
+				val === '1'
+					? _.assign(map, { [idx]: true })
+					: map
+			), {})
+
 		this.setState({
-			rule,
-			gameState: [initialState],
+			gameState: [activeIdxs],
+		})
+	}
+
+	setInitialState(initialState) {
+		this.setState({
+			initialState,
 		})
 	}
 

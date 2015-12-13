@@ -19685,11 +19685,13 @@
 
 	var _controls2 = _interopRequireDefault(_controls);
 
-	var _getNextActiveIdxMap = __webpack_require__(178);
+	var _getNextActiveIdxMap = __webpack_require__(179);
 
 	var _getNextActiveIdxMap2 = _interopRequireDefault(_getNextActiveIdxMap);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -19706,6 +19708,7 @@
 			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Game).call(this));
 
 			_this.state = {
+				initialState: '1',
 				rule: 110,
 				width: undefined,
 				stepInterval: undefined,
@@ -19720,6 +19723,7 @@
 				var _this2 = this;
 
 				var _state = this.state;
+				var initialState = _state.initialState;
 				var gameState = _state.gameState;
 				var rule = _state.rule;
 				var stepInterval = _state.stepInterval;
@@ -19729,12 +19733,16 @@
 					_jsxstyle.Block,
 					null,
 					_react2.default.createElement(_controls2.default, {
-						rule: rule,
-						onRuleChange: function onRuleChange(event) {
-							return _this2.setRule(event.target.value);
+						initialState: initialState,
+						onInitialStateChange: function onInitialStateChange(initialState) {
+							return _this2.setInitialState(initialState);
 						},
-						reset: function reset(initialState) {
-							_this2.reset(initialState);
+						rule: rule,
+						onRuleChange: function onRuleChange(rule) {
+							return _this2.setRule(rule);
+						},
+						reset: function reset() {
+							_this2.reset();
 						},
 						step: function step() {
 							_this2.step();
@@ -19776,10 +19784,22 @@
 			}
 		}, {
 			key: 'reset',
-			value: function reset(initialState) {
+			value: function reset() {
+				var initialState = this.state.initialState;
+
+				var activeIdxs = initialState.split('').reduce(function (map, val, idx) {
+					return val === '1' ? _lodash2.default.assign(map, _defineProperty({}, idx, true)) : map;
+				}, {});
+
 				this.setState({
-					rule: rule,
-					gameState: [initialState]
+					gameState: [activeIdxs]
+				});
+			}
+		}, {
+			key: 'setInitialState',
+			value: function setInitialState(initialState) {
+				this.setState({
+					initialState: initialState
 				});
 			}
 		}, {
@@ -32793,9 +32813,15 @@
 
 	var _jsxstyle = __webpack_require__(162);
 
+	var _button = __webpack_require__(178);
+
+	var _button2 = _interopRequireDefault(_button);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var Controls = function Controls(_ref) {
+		var initialState = _ref.initialState;
+		var onInitialStateChange = _ref.onInitialStateChange;
 		var rule = _ref.rule;
 		var onRuleChange = _ref.onRuleChange;
 		var step = _ref.step;
@@ -32809,45 +32835,97 @@
 				'label',
 				null,
 				'Rule:',
-				_react2.default.createElement('input', { type: 'text', value: rule, onChange: onRuleChange })
+				_react2.default.createElement('input', {
+					type: 'text',
+					value: rule,
+					onChange: function onChange(event) {
+						return onRuleChange(event.target.value);
+					} })
 			),
 			_react2.default.createElement(
-				'button',
-				{
-					style: {
-						width: '120px',
-						height: '30px',
-						background: '#fff',
-						border: '1px solid #000'
-					},
-					onClick: step },
+				'label',
+				null,
+				'Initial state:',
+				_react2.default.createElement('input', {
+					type: 'text',
+					value: initialState,
+					onChange: function onChange(event) {
+						return onInitialStateChange(event.target.value);
+					} })
+			),
+			_react2.default.createElement(
+				_button2.default,
+				{ onClick: reset },
+				'Reset'
+			),
+			_react2.default.createElement(
+				_button2.default,
+				{ onClick: step },
 				'Step'
 			),
 			_react2.default.createElement(
-				'button',
-				{
-					style: {
-						width: '120px',
-						height: '30px',
-						background: '#fff',
-						border: '1px solid #000'
-					},
-					onClick: toggleStepping },
+				_button2.default,
+				{ onClick: toggleStepping },
 				isStepping ? 'Stop' : 'Start'
 			)
 		);
 	};
 
 	Controls.propTypes = {
-		rule: _react.PropTypes.number,
-		step: _react.PropTypes.func,
-		reset: _react.PropTypes.func
+		initialState: _react.PropTypes.string.isRequired,
+		onInitialStateChange: _react.PropTypes.func.isRequired,
+		rule: _react.PropTypes.number.isRequired,
+		onRuleChange: _react.PropTypes.func.isRequired,
+		step: _react.PropTypes.func.isRequired,
+		reset: _react.PropTypes.func.isRequired,
+		isStepping: _react.PropTypes.bool.isRequired,
+		toggleStepping: _react.PropTypes.func.isRequired
 	};
 
 	exports.default = Controls;
 
 /***/ },
 /* 178 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Button = function Button(_ref) {
+		var children = _ref.children;
+		var onClick = _ref.onClick;
+		return _react2.default.createElement(
+			'button',
+			{
+				style: {
+					width: '120px',
+					height: '30px',
+					background: '#fff',
+					border: '1px solid #000'
+				},
+				onClick: onClick },
+			children
+		);
+	};
+
+	Button.propTypes = {
+		children: _react.PropTypes.node.isRequired,
+		onClick: _react.PropTypes.func
+	};
+
+	exports.default = Button;
+
+/***/ },
+/* 179 */
 /***/ function(module, exports) {
 
 	'use strict';

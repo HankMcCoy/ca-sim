@@ -1,7 +1,11 @@
 import React, { PropTypes } from 'react'
 import { Block } from 'jsxstyle'
 
+import Button from './button'
+
 const Controls = ({
+	initialState,
+	onInitialStateChange,
 	rule,
 	onRuleChange,
 	step,
@@ -12,35 +16,39 @@ const Controls = ({
 	<Block>
 		<label>
 			Rule:
-			<input type="text" value={rule} onChange={onRuleChange} />
+			<input
+				type="text"
+				value={rule}
+				onChange={(event) => onRuleChange(event.target.value)} />
 		</label>
-		<button
-			style={{
-				width: '120px',
-				height: '30px',
-				background: '#fff',
-				border: '1px solid #000',
-			}}
-			onClick={step}>
+		<label>
+			Initial state:
+			<input
+				type="text"
+				value={initialState}
+				onChange={(event) => onInitialStateChange(event.target.value)} />
+		</label>
+		<Button onClick={reset}>
+			Reset
+		</Button>
+		<Button onClick={step}>
 			Step
-		</button>
-		<button
-			style={{
-				width: '120px',
-				height: '30px',
-				background: '#fff',
-				border: '1px solid #000',
-			}}
-			onClick={toggleStepping}>
+		</Button>
+		<Button onClick={toggleStepping}>
 			{isStepping ? 'Stop' : 'Start'}
-		</button>
+		</Button>
 	</Block>
 )
 
 Controls.propTypes = {
-	rule: PropTypes.number,
-	step: PropTypes.func,
-	reset: PropTypes.func,
+	initialState: PropTypes.string.isRequired,
+	onInitialStateChange: PropTypes.func.isRequired,
+	rule: PropTypes.number.isRequired,
+	onRuleChange: PropTypes.func.isRequired,
+	step: PropTypes.func.isRequired,
+	reset: PropTypes.func.isRequired,
+	isStepping: PropTypes.bool.isRequired,
+	toggleStepping: PropTypes.func.isRequired,
 }
 
 export default Controls
