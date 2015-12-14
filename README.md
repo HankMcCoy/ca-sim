@@ -20,3 +20,4 @@ This is a simple simulator of any of the even-numbered elementary one-dimensiona
 - [ ] Improve data entry and validation for the initial tape and the current rule
 - [ ] Add Post-CSS autoprefixer (which I think should fix Safari's messed up layout)
 - [ ] Add some sort of interesting presets the user can choose from (combinations of both states and rules)
+- [ ] Find a way to re-center less frequently (this hurts performance; just compare rules 110 and 30 to see how much)
