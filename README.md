@@ -15,5 +15,5 @@ This is a simple simulator of any of the even-numbered elementary one-dimensiona
 - [X] Resize the cells once the output extends beyond the width of the viewport
 - [X] Constrain the height of the viewport
 - [X] Resize the cells once the output extends beyond the height of the viewport
+- [X] Switch to using canvas for rendering
 - [ ] Provide helpful validation messages for invalid automata (most notably odd numbered ones)
-- [ ] Switch to using canvas for rendering
