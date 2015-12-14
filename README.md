@@ -16,4 +16,7 @@ This is a simple simulator of any of the even-numbered elementary one-dimensiona
 - [X] Constrain the height of the viewport
 - [X] Resize the cells once the output extends beyond the height of the viewport
 - [X] Switch to using canvas for rendering
-- [ ] Provide helpful validation messages for invalid automata (most notably odd numbered ones)
+- [ ] Automatically stop running the CA when the user hits reset
+- [ ] Improve data entry and validation for the initial tape and the current rule
+- [ ] Add Post-CSS autoprefixer (which I think should fix Safari's messed up layout)
+- [ ] Add some sort of interesting presets the user can choose from (combinations of both states and rules)
