@@ -3,6 +3,25 @@
 	color: #555;
 	font-family: Helvetica, Arial;
 	font-size: 16px;
+	display: flex;
+	flex-direction: column;
+
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+}
+
+.controlsWrapper {
+	flex: 0 0 auto;
+}
+
+.boardWrapper {
+	flex: 1 0 auto;
+	border: 1px solid #eee;
+	text-align:center;
+	line-height: 50px;
 }
 
 .root button, .root input {

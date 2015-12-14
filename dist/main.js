@@ -19675,8 +19675,6 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _jsxstyle = __webpack_require__(162);
-
 	var _board = __webpack_require__(179);
 
 	var _board2 = _interopRequireDefault(_board);
@@ -19715,7 +19713,9 @@
 				initialState: '1',
 				rule: 110,
 				width: undefined,
+				height: undefined,
 				stepInterval: undefined,
+				isResizing: false,
 				gameState: [{ '0': true }]
 			};
 			return _this;
@@ -19732,30 +19732,43 @@
 				var rule = _state.rule;
 				var stepInterval = _state.stepInterval;
 				var width = _state.width;
+				var height = _state.height;
+				var isResizing = _state.isResizing;
 
 				return _react2.default.createElement(
-					_jsxstyle.Block,
+					'div',
 					{ className: _game2.default.root },
-					_react2.default.createElement(_controls2.default, {
-						initialState: initialState,
-						onInitialStateChange: function onInitialStateChange(initialState) {
-							return _this2.setInitialState(initialState);
-						},
-						rule: rule,
-						onRuleChange: function onRuleChange(rule) {
-							return _this2.setRule(rule);
-						},
-						reset: function reset() {
-							_this2.reset();
-						},
-						step: function step() {
-							_this2.step();
-						},
-						isStepping: stepInterval !== undefined,
-						toggleStepping: function toggleStepping() {
-							_this2.toggleStepping();
-						} }),
-					_react2.default.createElement(_board2.default, { gameState: gameState, width: width })
+					_react2.default.createElement(
+						'div',
+						{ className: _game2.default.controlsWrapper },
+						_react2.default.createElement(_controls2.default, {
+							initialState: initialState,
+							onInitialStateChange: function onInitialStateChange(initialState) {
+								return _this2.setInitialState(initialState);
+							},
+							rule: rule,
+							onRuleChange: function onRuleChange(rule) {
+								return _this2.setRule(rule);
+							},
+							reset: function reset() {
+								_this2.reset();
+							},
+							step: function step() {
+								_this2.step();
+							},
+							isStepping: stepInterval !== undefined,
+							toggleStepping: function toggleStepping() {
+								_this2.toggleStepping();
+							} })
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: _game2.default.boardWrapper },
+						isResizing ? 'Loading...' : _react2.default.createElement(_board2.default, {
+							gameState: gameState,
+							width: width,
+							height: height })
+					)
 				);
 			}
 		}, {
@@ -19763,17 +19776,26 @@
 			value: function componentDidMount() {
 				var _this3 = this;
 
-				this.resetWidth();
+				this.resetSize();
+				this.resetSizeSoon = _lodash2.default.debounce(function () {
+					_this3.resetSize();
+				}, 1000);
 
-				window.addEventListener('resize', _lodash2.default.debounce(function () {
-					_this3.resetWidth();
-				}, 1000));
+				window.addEventListener('resize', function () {
+					_this3.setState({ isResizing: true });
+					_this3.resetSizeSoon();
+				});
 			}
 		}, {
-			key: 'resetWidth',
-			value: function resetWidth() {
+			key: 'resetSize',
+			value: function resetSize() {
+				var el = _reactDom2.default.findDOMNode(this).querySelector('.' + _game2.default.boardWrapper);
+				var computedStyle = getComputedStyle(el);
+
 				this.setState({
-					width: parseInt(getComputedStyle(_reactDom2.default.findDOMNode(this)).width, 10)
+					isResizing: false,
+					width: parseInt(computedStyle.width, 10),
+					height: parseInt(computedStyle.height, 10)
 				});
 			}
 		}, {
@@ -32969,18 +32991,21 @@
 
 	var minCellSize = 1;
 	var maxCellSize = 5;
-	var borderSize = 1;
 
 	var Board = function Board(_ref) {
 		var gameState = _ref.gameState;
 		var width = _ref.width;
+		var height = _ref.height;
 
 		if (width === undefined) {
 			return _react2.default.createElement('div', null);
 		}
 
-		// Don't include the border in the calculation of how much space is available to render in
-		width -= borderSize * 2;
+		var renderWidthInPx = width;
+		var renderHeightInPx = height;
+		var constrainCellSize = function constrainCellSize(cellSize) {
+			return Math.max(Math.min(cellSize, maxCellSize), minCellSize);
+		};
 
 		// We should center the viewport at the mid-point between the leftmost and rightmost active cells.
 		// For the moment we'll just look at the most recent row. In the future we should expand to look at all rows
@@ -32992,23 +33017,32 @@
 		var leftmostActiveIdx = _getActiveIdxsMaxima.leftmostActiveIdx;
 		var rightmostActiveIdx = _getActiveIdxsMaxima.rightmostActiveIdx;
 
-		var numCellsToTryToDisplay = rightmostActiveIdx - leftmostActiveIdx + 1;
+		var activeRangeLength = rightmostActiveIdx - leftmostActiveIdx + 1;
 		var centerIdx = Math.round((rightmostActiveIdx + leftmostActiveIdx) / 2);
-		var cellSize = Math.floor(width / numCellsToTryToDisplay);
-		cellSize = Math.max(cellSize, minCellSize);
-		cellSize = Math.min(cellSize, maxCellSize);
-		var numCellsToActuallyDisplay = Math.floor(width / cellSize);
-		var startIdx = centerIdx - Math.floor(numCellsToActuallyDisplay / 2);
+
+		// Figure out how small the cell size needs to be in order to display what we'd like to display
+		// both horizontally and vertically. We then pick the smaller of these sizes so we guarantee we
+		// display as much as of the graph as we can.
+		var horizCellSize = constrainCellSize(Math.floor(renderWidthInPx / activeRangeLength));
+		var vertCellSize = constrainCellSize(Math.floor(renderHeightInPx / gameState.length));
+		var cellSize = Math.min(horizCellSize, vertCellSize);
+
+		var numCellsToDisplay = Math.floor(renderWidthInPx / cellSize);
+		var startIdx = centerIdx - Math.floor(numCellsToDisplay / 2);
+		var numRowsToDisplay = Math.floor(renderHeightInPx / cellSize);
+		var startRow = Math.max(gameState.length - numRowsToDisplay, 0);
 
 		return _react2.default.createElement(
 			_jsxstyle.Block,
-			{ border: borderSize + 'px solid #eee' },
-			gameState.map(function (idxMap, idx) {
+			null,
+			gameState.filter(function (idxMap, rowIdx) {
+				return rowIdx >= startRow;
+			}).map(function (idxMap, idx) {
 				return _react2.default.createElement(_row2.default, {
 					key: idx,
 					activeIdxMap: idxMap,
 					startIdx: startIdx,
-					numCells: numCellsToActuallyDisplay,
+					numCells: numCellsToDisplay,
 					cellSize: cellSize });
 			})
 		);
@@ -33438,11 +33472,13 @@
 
 
 	// module
-	exports.push([module.id, "._2VDAUwBcB3_NLyZIrR9tZo {\n\tpadding: 10px;\n\tcolor: #555;\n\tfont-family: Helvetica, Arial;\n\tfont-size: 16px;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button, ._2VDAUwBcB3_NLyZIrR9tZo input {\n\tdisplay: block;\n\tbox-sizing: border-box;\n\twidth: 100%;\n\tfont-family: inherit;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button {\n\tdisplay: inline-block;\n\theight: 38px;\n\tpadding: 0 30px;\n\tcolor: #555;\n\ttext-align: center;\n\tfont-size: 11px;\n\tfont-weight: 600;\n\tline-height: 38px;\n\tletter-spacing: .1rem;\n\ttext-transform: uppercase;\n\ttext-decoration: none;\n\twhite-space: nowrap;\n\tbackground-color: transparent;\n\tborder-radius: 4px;\n\tborder: 1px solid #bbb;\n\tcursor: pointer;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button:hover, ._2VDAUwBcB3_NLyZIrR9tZo button:focus {\n\tcolor: #333;\n\tborder-color: #888;\n\toutline: 0;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo .button-primary {\n\tcolor: #FFF;\n\tbackground-color: #33C3F0;\n\tborder-color: #33C3F0;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo .button-primary:focus, ._2VDAUwBcB3_NLyZIrR9tZo .button-primary:hover {\n\tcolor: #FFF;\n\tbackground-color: #1EAEDB;\n\tborder-color: #1EAEDB;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo input {\n\theight: 38px;\n\tpadding: 6px 10px;\n\tbackground-color: #fff;\n\tborder: 1px solid #D1D1D1;\n\tborder-radius: 4px;\n\tbox-shadow: none;\n\tbox-sizing: border-box;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo input:focus {\n\tborder: 1px solid #33C3F0;\n\toutline: 0;\n}\n", ""]);
+	exports.push([module.id, "._2VDAUwBcB3_NLyZIrR9tZo {\n\tpadding: 10px;\n\tcolor: #555;\n\tfont-family: Helvetica, Arial;\n\tfont-size: 16px;\n\tdisplay: flex;\n\tflex-direction: column;\n\n\tposition: absolute;\n\ttop: 0;\n\tright: 0;\n\tbottom: 0;\n\tleft: 0;\n}\n\n._3YbvATxEnTSGVKNMJi-GJn {\n\tflex: 0 0 auto;\n}\n\n._1GUZfc-Xrs7j9ESI8PBJeJ {\n\tflex: 1 0 auto;\n\tborder: 1px solid #eee;\n\ttext-align:center;\n\tline-height: 50px;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button, ._2VDAUwBcB3_NLyZIrR9tZo input {\n\tdisplay: block;\n\tbox-sizing: border-box;\n\twidth: 100%;\n\tfont-family: inherit;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button {\n\tdisplay: inline-block;\n\theight: 38px;\n\tpadding: 0 30px;\n\tcolor: #555;\n\ttext-align: center;\n\tfont-size: 11px;\n\tfont-weight: 600;\n\tline-height: 38px;\n\tletter-spacing: .1rem;\n\ttext-transform: uppercase;\n\ttext-decoration: none;\n\twhite-space: nowrap;\n\tbackground-color: transparent;\n\tborder-radius: 4px;\n\tborder: 1px solid #bbb;\n\tcursor: pointer;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button:hover, ._2VDAUwBcB3_NLyZIrR9tZo button:focus {\n\tcolor: #333;\n\tborder-color: #888;\n\toutline: 0;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo .button-primary {\n\tcolor: #FFF;\n\tbackground-color: #33C3F0;\n\tborder-color: #33C3F0;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo .button-primary:focus, ._2VDAUwBcB3_NLyZIrR9tZo .button-primary:hover {\n\tcolor: #FFF;\n\tbackground-color: #1EAEDB;\n\tborder-color: #1EAEDB;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo input {\n\theight: 38px;\n\tpadding: 6px 10px;\n\tbackground-color: #fff;\n\tborder: 1px solid #D1D1D1;\n\tborder-radius: 4px;\n\tbox-shadow: none;\n\tbox-sizing: border-box;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo input:focus {\n\tborder: 1px solid #33C3F0;\n\toutline: 0;\n}\n", ""]);
 
 	// exports
 	exports.locals = {
-		"root": "_2VDAUwBcB3_NLyZIrR9tZo"
+		"root": "_2VDAUwBcB3_NLyZIrR9tZo",
+		"controlsWrapper": "_3YbvATxEnTSGVKNMJi-GJn",
+		"boardWrapper": "_1GUZfc-Xrs7j9ESI8PBJeJ"
 	};
 
 /***/ }

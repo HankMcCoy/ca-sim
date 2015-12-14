@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import React, { PropTypes, Component } from 'react'
 import ReactDOM from 'react-dom'
-import { Block } from 'jsxstyle'
 
 import Board from './components/board'
 import Controls from './components/controls'
@@ -16,7 +15,9 @@ export default class Game extends Component {
 			initialState: '1',
 			rule: 110,
 			width: undefined,
+			height: undefined,
 			stepInterval: undefined,
+			isResizing: false,
 			gameState: [{ '0': true }],
 		}
 	}
@@ -28,35 +29,55 @@ export default class Game extends Component {
 			rule,
 			stepInterval,
 			width,
+			height,
+			isResizing,
 		} = this.state
 
 		return (
-			<Block className={styles.root}>
-				<Controls
-					initialState={initialState}
-					onInitialStateChange={(initialState) => this.setInitialState(initialState)}
-					rule={rule}
-					onRuleChange={(rule) => this.setRule(rule)}
-					reset={() => { this.reset() }}
-					step={() => { this.step() }}
-					isStepping={stepInterval !== undefined}
-					toggleStepping={() => { this.toggleStepping() }} />
-				<Board gameState={gameState} width={width} />
-			</Block>
+			<div className={styles.root}>
+				<div className={styles.controlsWrapper}>
+					<Controls
+						initialState={initialState}
+						onInitialStateChange={(initialState) => this.setInitialState(initialState)}
+						rule={rule}
+						onRuleChange={(rule) => this.setRule(rule)}
+						reset={() => { this.reset() }}
+						step={() => { this.step() }}
+						isStepping={stepInterval !== undefined}
+						toggleStepping={() => { this.toggleStepping() }} />
+				</div>
+				<div className={styles.boardWrapper}>
+					{isResizing
+						? 'Loading...'
+						: (
+							<Board
+								gameState={gameState}
+								width={width}
+								height={height} />
+						)}
+				</div>
+			</div>
 		)
 	}
 
 	componentDidMount() {
-		this.resetWidth()
+		this.resetSize()
+		this.resetSizeSoon = _.debounce(() => { this.resetSize() }, 1000)
 
-		window.addEventListener('resize', _.debounce(() => {
-			this.resetWidth()
-		}, 1000))
+		window.addEventListener('resize', () => {
+			this.setState({ isResizing: true })
+			this.resetSizeSoon()
+		})
 	}
 
-	resetWidth() {
+	resetSize() {
+		const el = ReactDOM.findDOMNode(this).querySelector(`.${styles.boardWrapper}`)
+		const computedStyle = getComputedStyle(el)
+
 		this.setState({
-			width: parseInt(getComputedStyle(ReactDOM.findDOMNode(this)).width, 10)
+			isResizing: false,
+			width: parseInt(computedStyle.width, 10),
+			height: parseInt(computedStyle.height, 10),
 		})
 	}
 
