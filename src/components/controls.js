@@ -3,8 +3,8 @@ import React, { PropTypes } from 'react'
 import styles from './controls.css'
 
 const Controls = ({
-	initialState,
-	onInitialStateChange,
+	initialTape,
+	onInitialTapeChange,
 	rule,
 	onRuleChange,
 	step,
@@ -18,8 +18,8 @@ const Controls = ({
 			<input
 				type="text"
 				className="u-full-width"
-				value={initialState}
-				onChange={(event) => onInitialStateChange(event.target.value)} />
+				value={initialTape}
+				onChange={(event) => onInitialTapeChange(event.target.value)} />
 			<button className="u-full-width" onClick={reset}>
 				Reset
 			</button>
@@ -42,8 +42,8 @@ const Controls = ({
 )
 
 Controls.propTypes = {
-	initialState: PropTypes.string.isRequired,
-	onInitialStateChange: PropTypes.func.isRequired,
+	initialTape: PropTypes.string.isRequired,
+	onInitialTapeChange: PropTypes.func.isRequired,
 	rule: PropTypes.number.isRequired,
 	onRuleChange: PropTypes.func.isRequired,
 	step: PropTypes.func.isRequired,

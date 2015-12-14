@@ -1,10 +1,10 @@
 import _ from 'lodash'
-import React, { PropTypes, Component } from 'react'
+import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 
 import Board from './components/board'
 import Controls from './components/controls'
-import getNextActiveIdxMap from './util/get-next-active-idx-map'
+import getNextRow from './util/get-next-row'
 import styles from './game.css'
 
 export default class Game extends Component {
@@ -12,20 +12,23 @@ export default class Game extends Component {
 		super()
 
 		this.state = {
-			initialState: '1',
+			initialTape: '1',
 			rule: 110,
 			width: undefined,
 			height: undefined,
 			stepInterval: undefined,
 			isResizing: false,
-			gameState: [{ '0': true }],
+			// Each row includes all active indexes for that row.
+			rows: [
+				[0],
+			],
 		}
 	}
 
 	render() {
 		const {
-			initialState,
-			gameState,
+			initialTape,
+			rows,
 			rule,
 			stepInterval,
 			width,
@@ -37,21 +40,21 @@ export default class Game extends Component {
 			<div className={styles.root}>
 				<div className={styles.controlsWrapper}>
 					<Controls
-						initialState={initialState}
-						onInitialStateChange={(initialState) => this.setInitialState(initialState)}
+						initialTape={initialTape}
+						onInitialTapeChange={(initialTape) => this.setInitialTape(initialTape)}
 						rule={rule}
 						onRuleChange={(rule) => this.setRule(rule)}
-						reset={() => { this.reset() }}
-						step={() => { this.step() }}
+						reset={() => this.reset()}
+						step={() => this.step()}
 						isStepping={stepInterval !== undefined}
-						toggleStepping={() => { this.toggleStepping() }} />
+						toggleStepping={() => this.toggleStepping()} />
 				</div>
 				<div className={styles.boardWrapper}>
 					{isResizing
 						? 'Loading...'
 						: (
 							<Board
-								gameState={gameState}
+								rows={rows}
 								width={width}
 								height={height} />
 						)}
@@ -62,7 +65,7 @@ export default class Game extends Component {
 
 	componentDidMount() {
 		this.resetSize()
-		this.resetSizeSoon = _.debounce(() => { this.resetSize() }, 1000)
+		this.resetSizeSoon = _.debounce(() => this.resetSize(), 1000)
 
 		window.addEventListener('resize', () => {
 			this.setState({ isResizing: true })
@@ -91,31 +94,29 @@ export default class Game extends Component {
 	}
 
 	reset() {
-		const { initialState } = this.state
-		const activeIdxs = initialState
+		const { initialTape } = this.state
+		const activeIdxs = initialTape
 			.split('')
-			.reduce((map, val, idx) => (
-				val === '1'
-					? _.assign(map, { [idx]: true })
-					: map
-			), {})
+			.reduce((arr, val, idx) => {
+				return val === '1' ? arr.concat(idx) : arr
+			}, [])
 
 		this.setState({
-			gameState: [activeIdxs],
+			rows: [activeIdxs],
 		})
 	}
 
-	setInitialState(initialState) {
+	setInitialTape(initialTape) {
 		this.setState({
-			initialState,
+			initialTape,
 		})
 	}
 
 	step() {
 		this.setState((state) => ({
-			gameState: state.gameState.concat(
-				getNextActiveIdxMap(_.last(state.gameState), state.rule)
-			)
+			rows: state.rows.concat([
+				getNextRow(_.last(state.rows), state.rule),
+			]),
 		}))
 	}
 
@@ -124,7 +125,7 @@ export default class Game extends Component {
 
 		if (stepInterval === undefined) {
 			this.setState({
-				stepInterval: setInterval(() => { this.step() }, 16)
+				stepInterval: setInterval(() => this.step(), 16),
 			})
 		} else {
 			clearInterval(this.state.stepInterval)

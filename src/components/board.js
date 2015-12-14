@@ -1,60 +1,61 @@
-import React, { PropTypes } from 'react'
-import { Block } from 'jsxstyle'
+import React, { Component, PropTypes } from 'react'
+import ReactDOM from 'react-dom'
 
-import Row from './row'
-import { activeIdxMapPropType } from '../prop-types'
-import getActiveIdxsMaxima from '../util/get-active-idxs-maxima'
+import getRenderInfo from '../util/get-render-info'
 
-const minCellSize = 1
-const maxCellSize = 5
+class Board extends Component {
+	render() {
+		const { width, height } = this.props
 
-const Board = ({ gameState, width, height }) => {
-	if (width === undefined) {
-		return <div />
+		return (
+			<canvas width={width} height={height}>
+				You are using a browser that does not support canvas. Please upgrade to a newer browser to
+				view this simulation.
+			</canvas>
+		)
 	}
 
-	const renderWidthInPx = width
-	const renderHeightInPx = height
-	const constrainCellSize = (cellSize) => Math.max(Math.min(cellSize, maxCellSize), minCellSize)
+	componentDidMount() {
+		this.updateCanvas()
+	}
 
-	// We should center the viewport at the mid-point between the leftmost and rightmost active cells.
-	// For the moment we'll just look at the most recent row. In the future we should expand to look at all rows
-	// since it is entirely possible the maxima may be earlier.
-	// We should also start tracking the maxima for each row separately
-	const { leftmostActiveIdx, rightmostActiveIdx } = getActiveIdxsMaxima(_.last(gameState))
-	const activeRangeLength = rightmostActiveIdx - leftmostActiveIdx + 1
-	const centerIdx = Math.round((rightmostActiveIdx + leftmostActiveIdx) / 2)
+	componentDidUpdate() {
+		this.updateCanvas()
+	}
 
-	// Figure out how small the cell size needs to be in order to display what we'd like to display
-	// both horizontally and vertically. We then pick the smaller of these sizes so we guarantee we
-	// display as much as of the graph as we can.
-	const horizCellSize = constrainCellSize(Math.floor(renderWidthInPx / activeRangeLength))
-	const vertCellSize = constrainCellSize(Math.floor(renderHeightInPx / gameState.length))
-	const cellSize = Math.min(horizCellSize, vertCellSize)
+	updateCanvas() {
+		const canvas = ReactDOM.findDOMNode(this)
+		const ctx = canvas.getContext('2d')
+		const { rows, width, height } = this.props
+		const {
+			cellSize,
+			renderableRangesByRow,
+		} = getRenderInfo({ rows, width, height })
 
-	const numCellsToDisplay = Math.floor(renderWidthInPx / cellSize)
-	const startIdx = centerIdx - Math.floor(numCellsToDisplay / 2)
-	const numRowsToDisplay = Math.floor(renderHeightInPx / cellSize)
-	const startRow = Math.max(gameState.length - numRowsToDisplay, 0)
+		let curRowIdx = 0
 
-	return (
-		<Block>
-			{gameState
-				.filter((idxMap, rowIdx) => rowIdx >= startRow)
-				.map((idxMap, idx) => (
-					<Row
-						key={idx}
-						activeIdxMap={idxMap}
-						startIdx={startIdx}
-						numCells={numCellsToDisplay}
-						cellSize={cellSize} />
-				))}
-		</Block>
-	)
+		ctx.clearRect(0, 0, width, height)
+		ctx.fillStyle = '#000'
+
+		renderableRangesByRow.forEach((renderableRanges, rowIdx) => {
+			renderableRanges.forEach((range) => {
+				const x = range.start * cellSize
+				const y = rowIdx * cellSize
+				const rectWidth = range.length * cellSize
+				const rectHeight = cellSize
+
+				ctx.fillRect(x, y, rectWidth, rectHeight)
+			})
+
+			curRowIdx += 1
+		})
+	}
 }
 
 Board.propTypes = {
-	gameState: PropTypes.arrayOf(activeIdxMapPropType)
+	rows: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
+	width: PropTypes.number,
+	height: PropTypes.number,
 }
 
 export default Board

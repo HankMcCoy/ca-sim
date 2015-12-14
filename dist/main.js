@@ -19675,25 +19675,23 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _board = __webpack_require__(179);
+	var _board = __webpack_require__(162);
 
 	var _board2 = _interopRequireDefault(_board);
 
-	var _controls = __webpack_require__(185);
+	var _controls = __webpack_require__(177);
 
 	var _controls2 = _interopRequireDefault(_controls);
 
-	var _getNextActiveIdxMap = __webpack_require__(188);
+	var _getNextRow = __webpack_require__(186);
 
-	var _getNextActiveIdxMap2 = _interopRequireDefault(_getNextActiveIdxMap);
+	var _getNextRow2 = _interopRequireDefault(_getNextRow);
 
-	var _game = __webpack_require__(189);
+	var _game = __webpack_require__(182);
 
 	var _game2 = _interopRequireDefault(_game);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -19710,13 +19708,14 @@
 			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Game).call(this));
 
 			_this.state = {
-				initialState: '1',
+				initialTape: '1',
 				rule: 110,
 				width: undefined,
 				height: undefined,
 				stepInterval: undefined,
 				isResizing: false,
-				gameState: [{ '0': true }]
+				// Each row includes all active indexes for that row.
+				rows: [[0]]
 			};
 			return _this;
 		}
@@ -19727,8 +19726,8 @@
 				var _this2 = this;
 
 				var _state = this.state;
-				var initialState = _state.initialState;
-				var gameState = _state.gameState;
+				var initialTape = _state.initialTape;
+				var rows = _state.rows;
 				var rule = _state.rule;
 				var stepInterval = _state.stepInterval;
 				var width = _state.width;
@@ -19742,30 +19741,30 @@
 						'div',
 						{ className: _game2.default.controlsWrapper },
 						_react2.default.createElement(_controls2.default, {
-							initialState: initialState,
-							onInitialStateChange: function onInitialStateChange(initialState) {
-								return _this2.setInitialState(initialState);
+							initialTape: initialTape,
+							onInitialTapeChange: function onInitialTapeChange(initialTape) {
+								return _this2.setInitialTape(initialTape);
 							},
 							rule: rule,
 							onRuleChange: function onRuleChange(rule) {
 								return _this2.setRule(rule);
 							},
 							reset: function reset() {
-								_this2.reset();
+								return _this2.reset();
 							},
 							step: function step() {
-								_this2.step();
+								return _this2.step();
 							},
 							isStepping: stepInterval !== undefined,
 							toggleStepping: function toggleStepping() {
-								_this2.toggleStepping();
+								return _this2.toggleStepping();
 							} })
 					),
 					_react2.default.createElement(
 						'div',
 						{ className: _game2.default.boardWrapper },
 						isResizing ? 'Loading...' : _react2.default.createElement(_board2.default, {
-							gameState: gameState,
+							rows: rows,
 							width: width,
 							height: height })
 					)
@@ -19778,7 +19777,7 @@
 
 				this.resetSize();
 				this.resetSizeSoon = _lodash2.default.debounce(function () {
-					_this3.resetSize();
+					return _this3.resetSize();
 				}, 1000);
 
 				window.addEventListener('resize', function () {
@@ -19811,21 +19810,21 @@
 		}, {
 			key: 'reset',
 			value: function reset() {
-				var initialState = this.state.initialState;
+				var initialTape = this.state.initialTape;
 
-				var activeIdxs = initialState.split('').reduce(function (map, val, idx) {
-					return val === '1' ? _lodash2.default.assign(map, _defineProperty({}, idx, true)) : map;
-				}, {});
+				var activeIdxs = initialTape.split('').reduce(function (arr, val, idx) {
+					return val === '1' ? arr.concat(idx) : arr;
+				}, []);
 
 				this.setState({
-					gameState: [activeIdxs]
+					rows: [activeIdxs]
 				});
 			}
 		}, {
-			key: 'setInitialState',
-			value: function setInitialState(initialState) {
+			key: 'setInitialTape',
+			value: function setInitialTape(initialTape) {
 				this.setState({
-					initialState: initialState
+					initialTape: initialTape
 				});
 			}
 		}, {
@@ -19833,7 +19832,7 @@
 			value: function step() {
 				this.setState(function (state) {
 					return {
-						gameState: state.gameState.concat((0, _getNextActiveIdxMap2.default)(_lodash2.default.last(state.gameState), state.rule))
+						rows: state.rows.concat([(0, _getNextRow2.default)(_lodash2.default.last(state.rows), state.rule)])
 					};
 				});
 			}
@@ -19847,7 +19846,7 @@
 				if (stepInterval === undefined) {
 					this.setState({
 						stepInterval: setInterval(function () {
-							_this4.step();
+							return _this4.step();
 						}, 16)
 					});
 				} else {
@@ -32243,414 +32242,342 @@
 
 	'use strict';
 
-	var Addons = __webpack_require__(163);
-	var Color = __webpack_require__(171);
-	var Display = __webpack_require__(165);
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var assign = __webpack_require__(168);
-	var curry = __webpack_require__(170);
-
-	var index = assign({curry: curry}, Color, Display, Addons);
-
-	module.exports = index;
-
-
-/***/ },
-/* 163 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var Flex = __webpack_require__(164);
-
-	var curry = __webpack_require__(170);
-
-	var Addons = {
-	  Row: curry(Flex, {flexDirection: 'row'}),
-	  Col: curry(Flex, {flexDirection: 'column'}),
-	};
-
-	module.exports = Addons;
-
-
-/***/ },
-/* 164 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(165).Flex;
-
-
-/***/ },
-/* 165 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var CSSDisplayNames = __webpack_require__(166);
-	var makeStyleComponentClass = __webpack_require__(167);
-
-	var Display = {};
-
-	for (var name in CSSDisplayNames) {
-	  var display = CSSDisplayNames[name];
-	  Display[name] = makeStyleComponentClass({display: display}, name);
-	}
-
-	module.exports = Display;
-
-
-/***/ },
-/* 166 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	var CSSDisplayNames = {
-	  Block: 'block',
-	  Flex: 'flex',
-	  InlineBlock: 'inline-block',
-	  Table: 'table',
-	  TableRow: 'table-row',
-	  TableCell: 'table-cell',
-	  Inline: 'inline',
-	};
-
-	module.exports = CSSDisplayNames;
-
-
-/***/ },
-/* 167 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-
-	var assign = __webpack_require__(168);
-	var autoprefix = __webpack_require__(169);
-
-	function makeStyleComponentClass(defaults, displayName, tagName) {
-	  tagName = tagName || 'div';
-
-	  var Style = React.createClass({
-	    displayName: displayName || 'Style',
-
-	    statics: {
-	      style: defaults
-	    },
-
-	    getDefaultProps: function() {
-	      return defaults;
-	    },
-
-	    render: function() {
-	      var style = assign({}, this.props, {
-	        children: null,
-	        className: null,
-	        component: null,
-	        style: null
-	      });
-	      assign(style, this.props.style);
-
-	      return React.createElement(
-	        this.props.component || tagName,
-	        assign(
-	          {},
-	          this.props.props || {},
-	          {style: autoprefix(style), className: this.props.className, children: this.props.children}
-	        )
-	      );
-	    }
-	  });
-
-	  return Style;
-	}
-
-	module.exports = makeStyleComponentClass;
-
-
-/***/ },
-/* 168 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	function ToObject(val) {
-		if (val == null) {
-			throw new TypeError('Object.assign cannot be called with null or undefined');
-		}
-
-		return Object(val);
-	}
-
-	module.exports = Object.assign || function (target, source) {
-		var from;
-		var keys;
-		var to = ToObject(target);
-
-		for (var s = 1; s < arguments.length; s++) {
-			from = arguments[s];
-			keys = Object.keys(Object(from));
-
-			for (var i = 0; i < keys.length; i++) {
-				to[keys[i]] = from[keys[i]];
-			}
-		}
-
-		return to;
-	};
-
-
-/***/ },
-/* 169 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var assign = __webpack_require__(168);
-
-	// TODO: package this separately
-	function autoprefix(style) {
-	  if (style.hasOwnProperty('userSelect')) {
-	    style = assign({}, style, {
-	      WebkitUserSelect: style.userSelect,
-	      MozUserSelect: style.userSelect,
-	      msUserSelect: style.userSelect,
-	    });
-	  }
-
-	  if (style.hasOwnProperty('transition')) {
-	    assign(style, {
-	      WebkitTransition: style.transition,
-	      MozTransition: style.transition,
-	      msTransition: style.transition,
-	    });
-	  }
-
-	  if (style.hasOwnProperty('boxShadow')) {
-	    assign(style, {
-	      WebkitBoxShadow: style.boxShadow,
-	      MozBoxShadow: style.boxShadow,
-	      msBoxSelect: style.boxShadow,
-	    });
-	  }
-
-	  if (style.hasOwnProperty('fontSmoothing')) {
-	    assign(style, {
-	      WebkitFontSmoothing: style.fontSmoothing,
-	      MozOsxFontSmoothing: style.fontSmoothing === 'antialiased' ? 'grayscale' : undefined,
-	    });
-	  }
-
-	  if (style.hasOwnProperty('flexDirection')) {
-	    assign(style, {
-	      WebkitFlexDirection: style.flexDirection,
-	    });
-	  }
-
-	  if (style.hasOwnProperty('flexWrap')) {
-	    assign(style, {
-	      WebkitFlexWrap: style.flexWrap,
-	    });
-	  }
-
-	  if (style.hasOwnProperty('alignItems')) {
-	    assign(style, {
-	      WebkitAlignItems: style.alignItems,
-	    });
-	  }
-
-	  if (style.hasOwnProperty('flexGrow')) {
-	    assign(style, {
-	      WebkitFlexGrow: style.flexGrow,
-	    });
-	  }
-
-	  if (style.hasOwnProperty('flexShrink')) {
-	    assign(style, {
-	      WebkitFlexShrink: style.flexShrink,
-	    });
-	  }
-
-	  if (style.hasOwnProperty('order')) {
-	    assign(style, {
-	      WebkitOrder: style.order,
-	    });
-	  }
-
-	  if (style.hasOwnProperty('justifyContent')) {
-	    assign(style, {
-	      WebkitJustifyContent: style.justifyContent,
-	    });
-	  }
-
-	  if (style.hasOwnProperty('flex')) {
-	    assign(style, {
-	      WebkitFlex: style.flex,
-	    });
-	  }
-
-	  if (style.display === 'flex') {
-	    style.display = style.display + ';display:-webkit-flex;display:-ms-flexbox';
-	  }
-
-	  return style;
-	}
-
-	module.exports = autoprefix;
-
-
-/***/ },
-/* 170 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-
-	var assign = __webpack_require__(168);
-
-	function curry(componentClass) {
-	  var args = Array.prototype.slice.call(arguments, 1);
-	  args.unshift({});
-	  var props = assign.apply(null, args);
-
-	  var propTypes = assign({}, componentClass.propTypes);
-	  for (var key in props) {
-	    delete propTypes[key];
-	  }
-
-	  return React.createClass({
-	    displayName: componentClass.displayName + ' (curried)',
-	    propTypes: propTypes,
-	    render: function() {
-	      return React.createElement(componentClass, assign({}, props, this.props));
-	    },
-	  });
-	}
-
-	module.exports = curry;
-
-
-/***/ },
-/* 171 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var assign = __webpack_require__(168);
-	var invariant = __webpack_require__(172);
-
-	function RGBA(r, g, b, a) {
-	  this.r = r;
-	  this.g = g;
-	  this.b = b;
-	  this.a = a;
-	}
-
-	assign(RGBA.prototype, {
-	  toString: function() {
-	    var params = Math.round(this.r) + ', ' + Math.round(this.g) + ', ' + Math.round(this.b);
-	    if (typeof this.a === 'undefined') {
-	      return 'rgb(' + params + ')';
-	    }
-	    return 'rgba(' + params + ',' + this.a + ')';
-	  }
+	Object.defineProperty(exports, "__esModule", {
+		value: true
 	});
 
-	var Color = {
-	  rgb: function(r, g, b) {
-	    invariant(arguments.length === 3, 'rgb() takes only 3 arguments');
-	    return new RGBA(r, g, b);
-	  },
+	var _react = __webpack_require__(1);
 
-	  rgba: function(r, g, b, a) {
-	    return new RGBA(r, g, b, a);
-	  },
+	var _react2 = _interopRequireDefault(_react);
 
-	  alpha: function(rgba, a) {
-	    return new RGBA(rgba.r, rgba.g, rgba.b, a);
-	  },
+	var _reactDom = __webpack_require__(158);
 
-	  shade: function(rgba, percent) {
-	    invariant(typeof percent === 'number' && percent >= 0 && percent <= 1, 'Percent must be between 0 and 1');
-	    return new RGBA(rgba.r * percent, rgba.g * percent, rgba.b * percent, rgba.a);
-	  },
+	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	  linearGradient: function(direction, points) {
-	    invariant(typeof direction === 'string', 'You must include a direction string');
-	    invariant(Array.isArray(points), 'points must be an array of arrays');
-	    return 'linear-gradient(' + direction + ', ' + points.map(function(point) {
-	      return point.join(' ');
-	    }).join(', ') + ')';
-	  },
+	var _getRenderInfo2 = __webpack_require__(176);
+
+	var _getRenderInfo3 = _interopRequireDefault(_getRenderInfo2);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Board = (function (_Component) {
+		_inherits(Board, _Component);
+
+		function Board() {
+			_classCallCheck(this, Board);
+
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(Board).apply(this, arguments));
+		}
+
+		_createClass(Board, [{
+			key: 'render',
+			value: function render() {
+				var _props = this.props;
+				var width = _props.width;
+				var height = _props.height;
+
+				return _react2.default.createElement(
+					'canvas',
+					{ width: width, height: height },
+					'You are using a browser that does not support canvas. Please upgrade to a newer browser to view this simulation.'
+				);
+			}
+		}, {
+			key: 'componentDidMount',
+			value: function componentDidMount() {
+				this.updateCanvas();
+			}
+		}, {
+			key: 'componentDidUpdate',
+			value: function componentDidUpdate() {
+				this.updateCanvas();
+			}
+		}, {
+			key: 'updateCanvas',
+			value: function updateCanvas() {
+				var canvas = _reactDom2.default.findDOMNode(this);
+				var ctx = canvas.getContext('2d');
+				var _props2 = this.props;
+				var rows = _props2.rows;
+				var width = _props2.width;
+				var height = _props2.height;
+
+				var _getRenderInfo = (0, _getRenderInfo3.default)({ rows: rows, width: width, height: height });
+
+				var cellSize = _getRenderInfo.cellSize;
+				var renderableRangesByRow = _getRenderInfo.renderableRangesByRow;
+
+				var curRowIdx = 0;
+
+				ctx.clearRect(0, 0, width, height);
+				ctx.fillStyle = '#000';
+
+				renderableRangesByRow.forEach(function (renderableRanges, rowIdx) {
+					renderableRanges.forEach(function (range) {
+						var x = range.start * cellSize;
+						var y = rowIdx * cellSize;
+						var rectWidth = range.length * cellSize;
+						var rectHeight = cellSize;
+
+						ctx.fillRect(x, y, rectWidth, rectHeight);
+					});
+
+					curRowIdx += 1;
+				});
+			}
+		}]);
+
+		return Board;
+	})(_react.Component);
+
+	Board.propTypes = {
+		rows: _react.PropTypes.arrayOf(_react.PropTypes.arrayOf(_react.PropTypes.number)),
+		width: _react.PropTypes.number,
+		height: _react.PropTypes.number
 	};
 
-	module.exports = Color;
-
+	exports.default = Board;
 
 /***/ },
-/* 172 */
+/* 163 */,
+/* 164 */,
+/* 165 */,
+/* 166 */,
+/* 167 */,
+/* 168 */,
+/* 169 */,
+/* 170 */,
+/* 171 */,
+/* 172 */,
+/* 173 */,
+/* 174 */,
+/* 175 */,
+/* 176 */
 /***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {/**
-	 * Copyright 2013-2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 */
 
 	'use strict';
 
-	/**
-	 * Use invariant() to assert state which your program assumes to be true.
-	 *
-	 * Provide sprintf-style format (only %s is supported) and arguments
-	 * to provide information about what broke and what you were
-	 * expecting.
-	 *
-	 * The invariant message will be stripped in production, but the invariant
-	 * will remain to ensure logic does not differ in production.
-	 */
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = getRenderInfo;
 
-	var invariant = function(condition, format, a, b, c, d, e, f) {
-	  if (process.env.NODE_ENV !== 'production') {
-	    if (format === undefined) {
-	      throw new Error('invariant requires an error message argument');
-	    }
-	  }
+	var _getRenderableRanges = __webpack_require__(184);
 
-	  if (!condition) {
-	    var error;
-	    if (format === undefined) {
-	      error = new Error(
-	        'Minified exception occurred; use the non-minified dev environment ' +
-	        'for the full error message and additional helpful warnings.'
-	      );
-	    } else {
-	      var args = [a, b, c, d, e, f];
-	      var argIndex = 0;
-	      error = new Error(
-	        format.replace(/%s/g, function() { return args[argIndex++]; })
-	      );
-	      error.name = 'Invariant Violation';
-	    }
+	var _getRenderableRanges2 = _interopRequireDefault(_getRenderableRanges);
 
-	    error.framesToPop = 1; // we don't care about invariant's own frame
-	    throw error;
-	  }
-	};
+	var _getActiveIdxsMaxima2 = __webpack_require__(185);
 
-	module.exports = invariant;
+	var _getActiveIdxsMaxima3 = _interopRequireDefault(_getActiveIdxsMaxima2);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var minCellSize = 1;
+	var maxCellSize = 5;
+
+	function getRenderInfo(_ref) {
+		var rows = _ref.rows;
+		var width = _ref.width;
+		var height = _ref.height;
+
+		var renderWidthInPx = width;
+		var renderHeightInPx = height;
+		var constrainCellSize = function constrainCellSize(cellSize) {
+			return Math.max(Math.min(cellSize, maxCellSize), minCellSize);
+		};
+
+		// We should center the viewport at the mid-point between the leftmost and rightmost active cells.
+
+		var _getActiveIdxsMaxima = (0, _getActiveIdxsMaxima3.default)(rows);
+
+		var leftmostActiveIdx = _getActiveIdxsMaxima.leftmostActiveIdx;
+		var rightmostActiveIdx = _getActiveIdxsMaxima.rightmostActiveIdx;
+
+		var activeRangeLength = rightmostActiveIdx - leftmostActiveIdx + 1;
+		var centerIdx = Math.round((rightmostActiveIdx + leftmostActiveIdx) / 2);
+
+		// Figure out how small the cell size needs to be in order to display what we'd like to display
+		// both horizontally and vertically. We then pick the smaller of these sizes so we guarantee we
+		// display as much as of the graph as we can.
+		var horizCellSize = constrainCellSize(Math.floor(renderWidthInPx / activeRangeLength));
+		var vertCellSize = constrainCellSize(Math.floor(renderHeightInPx / rows.length));
+		var cellSize = Math.min(horizCellSize, vertCellSize);
+
+		var numCellsToDisplay = Math.floor(renderWidthInPx / cellSize);
+		var startCellIdx = centerIdx - Math.floor(numCellsToDisplay / 2);
+		var endCellIdx = startCellIdx + numCellsToDisplay - 1;
+		var numRowsToDisplay = Math.floor(renderHeightInPx / cellSize);
+		var startRowIdx = Math.max(rows.length - numRowsToDisplay, 0);
+
+		// Get the active indexes within only the viewable area
+		var displayableRows = rows.filter(function (row, rowIdx) {
+			return rowIdx >= startRowIdx;
+		}).map(function (row) {
+			return row.filter(function (cellIdx) {
+				return cellIdx >= startCellIdx && cellIdx <= endCellIdx;
+			});
+		});
+
+		// Convert them to ranges
+		var renderableRangesByRow = displayableRows.map(function (row) {
+			return (0, _getRenderableRanges2.default)({ startCellIdx: startCellIdx, row: row });
+		});
+
+		// Return the ranges with the cell display size
+		return {
+			cellSize: cellSize,
+			renderableRangesByRow: renderableRangesByRow
+		};
+	}
 
 /***/ },
-/* 173 */,
-/* 174 */,
-/* 175 */
+/* 177 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _controls = __webpack_require__(178);
+
+	var _controls2 = _interopRequireDefault(_controls);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Controls = function Controls(_ref) {
+		var initialTape = _ref.initialTape;
+		var onInitialTapeChange = _ref.onInitialTapeChange;
+		var rule = _ref.rule;
+		var onRuleChange = _ref.onRuleChange;
+		var step = _ref.step;
+		var reset = _ref.reset;
+		var isStepping = _ref.isStepping;
+		var toggleStepping = _ref.toggleStepping;
+		return _react2.default.createElement(
+			'div',
+			{ className: _controls2.default.root },
+			_react2.default.createElement(
+				'div',
+				{ className: _controls2.default.row },
+				_react2.default.createElement(
+					'label',
+					null,
+					'Initial state:'
+				),
+				_react2.default.createElement('input', {
+					type: 'text',
+					className: 'u-full-width',
+					value: initialTape,
+					onChange: function onChange(event) {
+						return onInitialTapeChange(event.target.value);
+					} }),
+				_react2.default.createElement(
+					'button',
+					{ className: 'u-full-width', onClick: reset },
+					'Reset'
+				)
+			),
+			_react2.default.createElement(
+				'div',
+				{ className: _controls2.default.row },
+				_react2.default.createElement(
+					'label',
+					null,
+					'Rule:'
+				),
+				_react2.default.createElement('input', {
+					type: 'text',
+					className: 'u-full-width',
+					value: rule,
+					onChange: function onChange(event) {
+						return onRuleChange(event.target.value);
+					} }),
+				_react2.default.createElement(
+					'button',
+					{ className: 'u-full-width', onClick: step },
+					'Step'
+				),
+				_react2.default.createElement(
+					'button',
+					{ className: 'u-full-width button-primary', onClick: toggleStepping },
+					isStepping ? 'Stop' : 'Start'
+				)
+			)
+		);
+	};
+
+	Controls.propTypes = {
+		initialTape: _react.PropTypes.string.isRequired,
+		onInitialTapeChange: _react.PropTypes.func.isRequired,
+		rule: _react.PropTypes.number.isRequired,
+		onRuleChange: _react.PropTypes.func.isRequired,
+		step: _react.PropTypes.func.isRequired,
+		reset: _react.PropTypes.func.isRequired,
+		isStepping: _react.PropTypes.bool.isRequired,
+		toggleStepping: _react.PropTypes.func.isRequired
+	};
+
+	exports.default = Controls;
+
+/***/ },
+/* 178 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(179);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(181)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../node_modules/css-loader/index.js?modules!./controls.css", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js?modules!./controls.css");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 179 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(180)();
+	// imports
+
+
+	// module
+	exports.push([module.id, ".gOTEpkmIW7v47YFLX-9Y1 {\n\tdisplay: flex;\n\tflex-direction: column;\n}\n\n._1r4frMyRebMzasfgQD8MUi {\n\tdisplay: flex;\n\talign-items: center;\n\tmargin-bottom: 10px;\n}\n\n._1r4frMyRebMzasfgQD8MUi label {\n\tflex: 0 0 90px;\n}\n\n._1r4frMyRebMzasfgQD8MUi input {\n\tflex: auto;\n}\n\n._1r4frMyRebMzasfgQD8MUi button {\n\tflex: 0 0 120px;\n}\n\n._1r4frMyRebMzasfgQD8MUi > * {\n\tmargin: 0;\n}\n\n._1r4frMyRebMzasfgQD8MUi > *:not(:last-child) {\n\tmargin-right: 10px;\n}\n", ""]);
+
+	// exports
+	exports.locals = {
+		"root": "gOTEpkmIW7v47YFLX-9Y1",
+		"row": "_1r4frMyRebMzasfgQD8MUi"
+	};
+
+/***/ },
+/* 180 */
 /***/ function(module, exports) {
 
 	/*
@@ -32706,7 +32633,7 @@
 
 
 /***/ },
-/* 176 */
+/* 181 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -32960,494 +32887,16 @@
 
 
 /***/ },
-/* 177 */,
-/* 178 */,
-/* 179 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _jsxstyle = __webpack_require__(162);
-
-	var _row = __webpack_require__(180);
-
-	var _row2 = _interopRequireDefault(_row);
-
-	var _propTypes = __webpack_require__(182);
-
-	var _getActiveIdxsMaxima2 = __webpack_require__(184);
-
-	var _getActiveIdxsMaxima3 = _interopRequireDefault(_getActiveIdxsMaxima2);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var minCellSize = 1;
-	var maxCellSize = 5;
-
-	var Board = function Board(_ref) {
-		var gameState = _ref.gameState;
-		var width = _ref.width;
-		var height = _ref.height;
-
-		if (width === undefined) {
-			return _react2.default.createElement('div', null);
-		}
-
-		var renderWidthInPx = width;
-		var renderHeightInPx = height;
-		var constrainCellSize = function constrainCellSize(cellSize) {
-			return Math.max(Math.min(cellSize, maxCellSize), minCellSize);
-		};
-
-		// We should center the viewport at the mid-point between the leftmost and rightmost active cells.
-		// For the moment we'll just look at the most recent row. In the future we should expand to look at all rows
-		// since it is entirely possible the maxima may be earlier.
-		// We should also start tracking the maxima for each row separately
-
-		var _getActiveIdxsMaxima = (0, _getActiveIdxsMaxima3.default)(_.last(gameState));
-
-		var leftmostActiveIdx = _getActiveIdxsMaxima.leftmostActiveIdx;
-		var rightmostActiveIdx = _getActiveIdxsMaxima.rightmostActiveIdx;
-
-		var activeRangeLength = rightmostActiveIdx - leftmostActiveIdx + 1;
-		var centerIdx = Math.round((rightmostActiveIdx + leftmostActiveIdx) / 2);
-
-		// Figure out how small the cell size needs to be in order to display what we'd like to display
-		// both horizontally and vertically. We then pick the smaller of these sizes so we guarantee we
-		// display as much as of the graph as we can.
-		var horizCellSize = constrainCellSize(Math.floor(renderWidthInPx / activeRangeLength));
-		var vertCellSize = constrainCellSize(Math.floor(renderHeightInPx / gameState.length));
-		var cellSize = Math.min(horizCellSize, vertCellSize);
-
-		var numCellsToDisplay = Math.floor(renderWidthInPx / cellSize);
-		var startIdx = centerIdx - Math.floor(numCellsToDisplay / 2);
-		var numRowsToDisplay = Math.floor(renderHeightInPx / cellSize);
-		var startRow = Math.max(gameState.length - numRowsToDisplay, 0);
-
-		return _react2.default.createElement(
-			_jsxstyle.Block,
-			null,
-			gameState.filter(function (idxMap, rowIdx) {
-				return rowIdx >= startRow;
-			}).map(function (idxMap, idx) {
-				return _react2.default.createElement(_row2.default, {
-					key: idx,
-					activeIdxMap: idxMap,
-					startIdx: startIdx,
-					numCells: numCellsToDisplay,
-					cellSize: cellSize });
-			})
-		);
-	};
-
-	Board.propTypes = {
-		gameState: _react.PropTypes.arrayOf(_propTypes.activeIdxMapPropType)
-	};
-
-	exports.default = Board;
-
-/***/ },
-/* 180 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	var _lodash = __webpack_require__(160);
-
-	var _lodash2 = _interopRequireDefault(_lodash);
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _jsxstyle = __webpack_require__(162);
-
-	var _propTypes = __webpack_require__(182);
-
-	var _getSortedActiveIdxs = __webpack_require__(183);
-
-	var _getSortedActiveIdxs2 = _interopRequireDefault(_getSortedActiveIdxs);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var Spacer = function Spacer(_ref) {
-		var isActive = _ref.isActive;
-		var width = _ref.width;
-		var height = _ref.height;
-		return _react2.default.createElement(_jsxstyle.Block, {
-			float: 'left',
-			background: isActive ? '#000' : 'transparent',
-			width: width,
-			height: height });
-	};
-
-	var Row = (function (_Component) {
-		_inherits(Row, _Component);
-
-		function Row() {
-			_classCallCheck(this, Row);
-
-			return _possibleConstructorReturn(this, Object.getPrototypeOf(Row).apply(this, arguments));
-		}
-
-		_createClass(Row, [{
-			key: 'render',
-			value: function render() {
-				var _props = this.props;
-				var activeIdxMap = _props.activeIdxMap;
-				var startIdx = _props.startIdx;
-				var numCells = _props.numCells;
-				var cellSize = _props.cellSize;
-
-				var sortedActiveIdxs = (0, _getSortedActiveIdxs2.default)(activeIdxMap).filter(function (idx) {
-					return idx >= startIdx && idx < startIdx + numCells;
-				});
-				var leftmostActiveIdx = _lodash2.default.first(sortedActiveIdxs);
-				var rightmostActiveIdx = _lodash2.default.last(sortedActiveIdxs);
-				var ranges = sortedActiveIdxs.reduce(function (ranges, idx) {
-					if (!ranges.length) {
-						return [{
-							start: idx,
-							length: 1,
-							isActive: true
-						}];
-					}
-
-					var prevRange = _lodash2.default.last(ranges);
-					var nextRangeStart = prevRange.start + prevRange.length;
-
-					if (nextRangeStart === idx) {
-						prevRange.length += 1;
-					} else {
-						ranges.push({
-							start: nextRangeStart,
-							length: idx - nextRangeStart,
-							isActive: false
-						});
-
-						ranges.push({
-							start: idx,
-							length: 1,
-							isActive: true
-						});
-					}
-
-					return ranges;
-				}, []);
-
-				return _react2.default.createElement(
-					_jsxstyle.Block,
-					{ height: cellSize + 'px' },
-					_react2.default.createElement(Spacer, {
-						isActive: false,
-						width: (leftmostActiveIdx - startIdx) * cellSize,
-						height: cellSize }),
-					ranges.map(function (range, idx) {
-						return _react2.default.createElement(Spacer, {
-							key: idx,
-							isActive: range.isActive,
-							width: range.length * cellSize,
-							height: cellSize });
-					})
-				);
-			}
-		}, {
-			key: 'shouldComponentUpdate',
-			value: function shouldComponentUpdate(nextProps) {
-				return !_lodash2.default.isEqual(this.props, nextProps);
-			}
-		}]);
-
-		return Row;
-	})(_react.Component);
-
-	exports.default = Row;
-
-	Row.propTypes = {
-		activeIdxMap: _propTypes.activeIdxMapPropType
-	};
-
-/***/ },
-/* 181 */,
 /* 182 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.activeIdxMapPropType = undefined;
-
-	var _react = __webpack_require__(1);
-
-	var activeIdxMapPropType = exports.activeIdxMapPropType = _react.PropTypes.objectOf(_react.PropTypes.bool);
-
-/***/ },
-/* 183 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = getSortedActiveIdxs;
-
-	var _lodash = __webpack_require__(160);
-
-	var _lodash2 = _interopRequireDefault(_lodash);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function getSortedActiveIdxs(activeIdxMap) {
-		var activeIdxs = Object.keys(activeIdxMap).map(function (x) {
-			return parseInt(x, 10);
-		});
-		return _lodash2.default.sortBy(activeIdxs);
-	}
-
-/***/ },
-/* 184 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = getActiveIdxsMaxima;
-
-	var _lodash = __webpack_require__(160);
-
-	var _lodash2 = _interopRequireDefault(_lodash);
-
-	var _getSortedActiveIdxs = __webpack_require__(183);
-
-	var _getSortedActiveIdxs2 = _interopRequireDefault(_getSortedActiveIdxs);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function getActiveIdxsMaxima(activeIdxMap) {
-		var sortedActiveIdxs = (0, _getSortedActiveIdxs2.default)(activeIdxMap);
-
-		return {
-			leftmostActiveIdx: _lodash2.default.first(sortedActiveIdxs),
-			rightmostActiveIdx: _lodash2.default.last(sortedActiveIdxs)
-		};
-	}
-
-/***/ },
-/* 185 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _controls = __webpack_require__(186);
-
-	var _controls2 = _interopRequireDefault(_controls);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Controls = function Controls(_ref) {
-		var initialState = _ref.initialState;
-		var onInitialStateChange = _ref.onInitialStateChange;
-		var rule = _ref.rule;
-		var onRuleChange = _ref.onRuleChange;
-		var step = _ref.step;
-		var reset = _ref.reset;
-		var isStepping = _ref.isStepping;
-		var toggleStepping = _ref.toggleStepping;
-		return _react2.default.createElement(
-			'div',
-			{ className: _controls2.default.root },
-			_react2.default.createElement(
-				'div',
-				{ className: _controls2.default.row },
-				_react2.default.createElement(
-					'label',
-					null,
-					'Initial state:'
-				),
-				_react2.default.createElement('input', {
-					type: 'text',
-					className: 'u-full-width',
-					value: initialState,
-					onChange: function onChange(event) {
-						return onInitialStateChange(event.target.value);
-					} }),
-				_react2.default.createElement(
-					'button',
-					{ className: 'u-full-width', onClick: reset },
-					'Reset'
-				)
-			),
-			_react2.default.createElement(
-				'div',
-				{ className: _controls2.default.row },
-				_react2.default.createElement(
-					'label',
-					null,
-					'Rule:'
-				),
-				_react2.default.createElement('input', {
-					type: 'text',
-					className: 'u-full-width',
-					value: rule,
-					onChange: function onChange(event) {
-						return onRuleChange(event.target.value);
-					} }),
-				_react2.default.createElement(
-					'button',
-					{ className: 'u-full-width', onClick: step },
-					'Step'
-				),
-				_react2.default.createElement(
-					'button',
-					{ className: 'u-full-width button-primary', onClick: toggleStepping },
-					isStepping ? 'Stop' : 'Start'
-				)
-			)
-		);
-	};
-
-	Controls.propTypes = {
-		initialState: _react.PropTypes.string.isRequired,
-		onInitialStateChange: _react.PropTypes.func.isRequired,
-		rule: _react.PropTypes.number.isRequired,
-		onRuleChange: _react.PropTypes.func.isRequired,
-		step: _react.PropTypes.func.isRequired,
-		reset: _react.PropTypes.func.isRequired,
-		isStepping: _react.PropTypes.bool.isRequired,
-		toggleStepping: _react.PropTypes.func.isRequired
-	};
-
-	exports.default = Controls;
-
-/***/ },
-/* 186 */
-/***/ function(module, exports, __webpack_require__) {
-
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(187);
+	var content = __webpack_require__(183);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(176)(content, {});
-	if(content.locals) module.exports = content.locals;
-	// Hot Module Replacement
-	if(false) {
-		// When the styles change, update the <style> tags
-		if(!content.locals) {
-			module.hot.accept("!!./../../node_modules/css-loader/index.js?modules!./controls.css", function() {
-				var newContent = require("!!./../../node_modules/css-loader/index.js?modules!./controls.css");
-				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-				update(newContent);
-			});
-		}
-		// When the module is disposed, remove the <style> tags
-		module.hot.dispose(function() { update(); });
-	}
-
-/***/ },
-/* 187 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports = module.exports = __webpack_require__(175)();
-	// imports
-
-
-	// module
-	exports.push([module.id, ".gOTEpkmIW7v47YFLX-9Y1 {\n\tdisplay: flex;\n\tflex-direction: column;\n}\n\n._1r4frMyRebMzasfgQD8MUi {\n\tdisplay: flex;\n\talign-items: center;\n\tmargin-bottom: 10px;\n}\n\n._1r4frMyRebMzasfgQD8MUi label {\n\tflex: 0 0 90px;\n}\n\n._1r4frMyRebMzasfgQD8MUi input {\n\tflex: auto;\n}\n\n._1r4frMyRebMzasfgQD8MUi button {\n\tflex: 0 0 120px;\n}\n\n._1r4frMyRebMzasfgQD8MUi > * {\n\tmargin: 0;\n}\n\n._1r4frMyRebMzasfgQD8MUi > *:not(:last-child) {\n\tmargin-right: 10px;\n}\n", ""]);
-
-	// exports
-	exports.locals = {
-		"root": "gOTEpkmIW7v47YFLX-9Y1",
-		"row": "_1r4frMyRebMzasfgQD8MUi"
-	};
-
-/***/ },
-/* 188 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = getNextActiveIdxMap;
-	var getBitForIdx = function getBitForIdx(idx, activeIdxMap) {
-		return idx in activeIdxMap | 0;
-	};
-
-	function getNextActiveIdxMap(prevActiveIdxMap, rule) {
-		if (rule % 2 === 1) {
-			throw new Error('Only even numbered automata supported at this time');
-		}
-
-		var prevActiveIdxs = _.sortBy(Object.keys(prevActiveIdxMap).map(function (key) {
-			return +key;
-		}));
-		var firstActiveIdx = _.first(prevActiveIdxs);
-		var lastActiveIdx = _.last(prevActiveIdxs);
-		var getPrevBitForIdx = function getPrevBitForIdx(idx) {
-			return getBitForIdx(idx, prevActiveIdxMap);
-		};
-
-		return _.range(firstActiveIdx - 1, lastActiveIdx + 2).reduce(function (nextActiveIdxMap, idx) {
-			var leftBit = getPrevBitForIdx(idx - 1);
-			var centerBit = getPrevBitForIdx(idx);
-			var rightBit = getPrevBitForIdx(idx + 1);
-			var ruleMask = 1 << (leftBit << 2) + (centerBit << 1) + rightBit;
-
-			if (rule & ruleMask) {
-				nextActiveIdxMap[idx] = true;
-			}
-
-			return nextActiveIdxMap;
-		}, {});
-	}
-
-/***/ },
-/* 189 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// style-loader: Adds some css to the DOM by adding a <style> tag
-
-	// load the styles
-	var content = __webpack_require__(190);
-	if(typeof content === 'string') content = [[module.id, content, '']];
-	// add the styles to the DOM
-	var update = __webpack_require__(176)(content, {});
+	var update = __webpack_require__(181)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -33464,10 +32913,10 @@
 	}
 
 /***/ },
-/* 190 */
+/* 183 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(175)();
+	exports = module.exports = __webpack_require__(180)();
 	// imports
 
 
@@ -33480,6 +32929,132 @@
 		"controlsWrapper": "_3YbvATxEnTSGVKNMJi-GJn",
 		"boardWrapper": "_1GUZfc-Xrs7j9ESI8PBJeJ"
 	};
+
+/***/ },
+/* 184 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = getRenderableRanges;
+
+	var _lodash = __webpack_require__(160);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function getRenderableRanges(_ref) {
+		var startCellIdx = _ref.startCellIdx;
+		var row = _ref.row;
+
+		return row.reduce(function (ranges, idx) {
+			var relativeIdx = idx - startCellIdx;
+			if (!ranges.length) {
+				return [{
+					start: relativeIdx,
+					length: 1,
+					isActive: true
+				}];
+			}
+
+			var prevRange = _lodash2.default.last(ranges);
+			var nextRangeStart = prevRange.start + prevRange.length;
+
+			if (nextRangeStart === relativeIdx) {
+				prevRange.length += 1;
+			} else {
+				ranges.push({
+					start: relativeIdx,
+					length: 1
+				});
+			}
+
+			return ranges;
+		}, []);
+	}
+
+/***/ },
+/* 185 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = getActiveIdxsMaxima;
+
+	var _lodash = __webpack_require__(160);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function getActiveIdxsMaxima(rows) {
+		var leftmostActiveIdx = _lodash2.default.first(_lodash2.default.first(rows));
+		var rightmostActiveIdx = _lodash2.default.last(_lodash2.default.first(rows));
+
+		rows.slice(1).forEach(function (row) {
+			leftmostActiveIdx = Math.min(leftmostActiveIdx, _lodash2.default.first(row));
+			rightmostActiveIdx = Math.max(rightmostActiveIdx, _lodash2.default.last(row));
+		});
+
+		return {
+			leftmostActiveIdx: leftmostActiveIdx,
+			rightmostActiveIdx: rightmostActiveIdx
+		};
+	}
+
+/***/ },
+/* 186 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = getNextRow;
+
+	var _lodash = __webpack_require__(160);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	var getBitForIdx = function getBitForIdx(idx, activeIdxMap) {
+		return idx in activeIdxMap | 0;
+	};
+
+	function getNextRow(prevRow, rule) {
+		if (rule % 2 === 1) {
+			throw new Error('Only even numbered automata supported at this time');
+		}
+
+		var firstActiveIdx = _lodash2.default.first(prevRow);
+		var lastActiveIdx = _lodash2.default.last(prevRow);
+		var prevActiveIdxMap = prevRow.reduce(function (map, idx) {
+			return _lodash2.default.assign(map, _defineProperty({}, idx, true));
+		}, {});
+		var getPrevBitForIdx = function getPrevBitForIdx(idx) {
+			return getBitForIdx(idx, prevActiveIdxMap);
+		};
+
+		return _lodash2.default.range(firstActiveIdx - 1, lastActiveIdx + 2).reduce(function (nextRow, idx) {
+			var leftBit = getPrevBitForIdx(idx - 1);
+			var centerBit = getPrevBitForIdx(idx);
+			var rightBit = getPrevBitForIdx(idx + 1);
+			var ruleMask = 1 << (leftBit << 2) + (centerBit << 1) + rightBit;
+
+			return rule & ruleMask ? nextRow.concat(idx) : nextRow;
+		}, []);
+	}
 
 /***/ }
 /******/ ]);

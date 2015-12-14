@@ -1,12 +1,16 @@
 import _ from 'lodash'
 
-import getSortedActiveIdxs from './get-sorted-active-idxs'
+export default function getActiveIdxsMaxima(rows) {
+	let leftmostActiveIdx = _.first(_.first(rows))
+	let rightmostActiveIdx = _.last(_.first(rows))
 
-export default function getActiveIdxsMaxima(activeIdxMap) {
-	const sortedActiveIdxs = getSortedActiveIdxs(activeIdxMap)
+	rows.slice(1).forEach((row) => {
+		leftmostActiveIdx = Math.min(leftmostActiveIdx, _.first(row))
+		rightmostActiveIdx = Math.max(rightmostActiveIdx, _.last(row))
+	})
 
 	return {
-		leftmostActiveIdx: _.first(sortedActiveIdxs),
-		rightmostActiveIdx: _.last(sortedActiveIdxs),
+		leftmostActiveIdx,
+		rightmostActiveIdx,
 	}
 }
