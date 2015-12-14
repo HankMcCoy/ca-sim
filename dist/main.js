@@ -32286,7 +32286,7 @@
 
 				return _react2.default.createElement(
 					'canvas',
-					{ width: width, height: height },
+					{ width: width, height: height, style: { display: 'block' } },
 					'You are using a browser that does not support canvas. Please upgrade to a newer browser to view this simulation.'
 				);
 			}

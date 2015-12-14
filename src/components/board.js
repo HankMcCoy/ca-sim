@@ -8,7 +8,7 @@ class Board extends Component {
 		const { width, height } = this.props
 
 		return (
-			<canvas width={width} height={height}>
+			<canvas width={width} height={height} style={{ display: 'block' }}>
 				You are using a browser that does not support canvas. Please upgrade to a newer browser to
 				view this simulation.
 			</canvas>
