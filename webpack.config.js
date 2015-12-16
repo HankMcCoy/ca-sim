@@ -6,6 +6,7 @@ const webpack = require('webpack')
 module.exports = {
 	entry: './src/main.js',
 	output: {
+		publicPath: '/dist',
 		path: __dirname + '/dist',
 		filename: 'main.js',
 	},
