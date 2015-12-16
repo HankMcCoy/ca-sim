@@ -4,7 +4,7 @@ import getActiveIdxsMaxima from './get-active-idxs-maxima'
 const minCellSize = 1
 const maxCellSize = 5
 
-export default function getRenderInfo({ rows, width, height }) {
+export default function getRenderInfo({ rows, width, height, prevCenterIdx }) {
 	const renderWidthInPx = width
 	const renderHeightInPx = height
 	const constrainCellSize = (cellSize) => Math.max(Math.min(cellSize, maxCellSize), minCellSize)
@@ -12,7 +12,12 @@ export default function getRenderInfo({ rows, width, height }) {
 	// We should center the viewport at the mid-point between the leftmost and rightmost active cells.
 	const { leftmostActiveIdx, rightmostActiveIdx } = getActiveIdxsMaxima(rows)
 	const activeRangeLength = rightmostActiveIdx - leftmostActiveIdx + 1
-	const centerIdx = Math.round((rightmostActiveIdx + leftmostActiveIdx) / 2)
+	let centerIdx = Math.round((rightmostActiveIdx + leftmostActiveIdx) / 2)
+
+	// Only re-center if we're quite a bit off
+	if (Math.abs(prevCenterIdx - centerIdx) < Math.sqrt(rows.length)) {
+		centerIdx = prevCenterIdx
+	}
 
 	// Figure out how small the cell size needs to be in order to display what we'd like to display
 	// both horizontally and vertically. We then pick the smaller of these sizes so we guarantee we
@@ -42,6 +47,7 @@ export default function getRenderInfo({ rows, width, height }) {
 	// Return the ranges with the cell display size
 	return {
 		cellSize,
+		centerIdx,
 		renderableRangesByRow,
 	}
 }

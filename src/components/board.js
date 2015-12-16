@@ -31,7 +31,15 @@ class Board extends Component {
 		const {
 			cellSize,
 			renderableRangesByRow,
-		} = getRenderInfo({ rows, width, height })
+			centerIdx,
+		} = getRenderInfo({
+			rows,
+			width,
+			height,
+			prevCenterIdx: this.centerIdx,
+		})
+
+		this.centerIdx = centerIdx
 
 		ctx.clearRect(0, 0, width, height)
 

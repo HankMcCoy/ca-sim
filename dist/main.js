@@ -1,7 +1,7 @@
 !function(e){function t(r){if(n[r])return n[r].exports
 var o=n[r]={exports:{},id:r,loaded:!1}
 return e[r].call(o.exports,o,o.exports,t),o.loaded=!0,o.exports}var n={}
-return t.m=e,t.c=n,t.p="",t(0)}([function(e,t,n){"use strict"
+return t.m=e,t.c=n,t.p="/dist",t(0)}([function(e,t,n){"use strict"
 function r(e){return e&&e.__esModule?e:{"default":e}}var o=n(1),i=r(o),a=n(153),u=r(a),l=n(154),s=r(l);[].forEach.call(document.querySelectorAll(".rule110-container"),function(e){u["default"].render(i["default"].createElement(s["default"],null),e)})},function(e,t,n){"use strict"
 e.exports=n(2)},function(e,t,n){"use strict"
 var r=n(3),o=n(143),i=n(147),a=n(38),u=n(152),l={}
@@ -1599,12 +1599,14 @@ e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,wri
 r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}return function(t,n,r){return n&&e(t.prototype,n),r&&e(t,r),t}}()
 Object.defineProperty(t,"__esModule",{value:!0})
 var l=n(1),s=r(l),c=n(153),p=r(c),f=n(158),d=r(f),h=n(161),v=r(h),g=function(e){function t(){return o(this,t),i(this,Object.getPrototypeOf(t).apply(this,arguments))}return a(t,e),u(t,[{key:"render",value:function(){var e=this.props,t=e.width,n=e.height
-return s["default"].createElement("canvas",{width:t,height:n,style:{display:"block"}},"You are using a browser that does not support canvas. Please upgrade to a newer browser to view this simulation.")}},{key:"componentDidMount",value:function(){this.updateCanvas()}},{key:"componentDidUpdate",value:function(){this.updateCanvas()}},{key:"updateCanvas",value:function(){var e=p["default"].findDOMNode(this),t=e.getContext("2d"),n=this.props,r=n.rows,o=n.width,i=n.height,a=(0,d["default"])({rows:r,width:o,height:i}),u=a.cellSize,l=a.renderableRangesByRow
-if(t.clearRect(0,0,o,i),"number"==typeof o&&"number"==typeof i){var s=(0,v["default"])({width:o,cellSize:u,renderableRangesByRow:l,imageData:t.createImageData(o,i)})
-t.putImageData(s,0,0)}}}]),t}(l.Component)
+return s["default"].createElement("canvas",{width:t,height:n,style:{display:"block"}},"You are using a browser that does not support canvas. Please upgrade to a newer browser to view this simulation.")}},{key:"componentDidMount",value:function(){this.updateCanvas()}},{key:"componentDidUpdate",value:function(){this.updateCanvas()}},{key:"updateCanvas",value:function(){var e=p["default"].findDOMNode(this),t=e.getContext("2d"),n=this.props,r=n.rows,o=n.width,i=n.height,a=(0,d["default"])({rows:r,width:o,height:i,prevCenterIdx:this.centerIdx}),u=a.cellSize,l=a.renderableRangesByRow,s=a.centerIdx
+if(this.centerIdx=s,t.clearRect(0,0,o,i),"number"==typeof o&&"number"==typeof i){var c=(0,v["default"])({width:o,cellSize:u,renderableRangesByRow:l,imageData:t.createImageData(o,i)})
+t.putImageData(c,0,0)}}}]),t}(l.Component)
 g.propTypes={rows:l.PropTypes.arrayOf(l.PropTypes.arrayOf(l.PropTypes.number)),width:l.PropTypes.number,height:l.PropTypes.number},t["default"]=g},function(e,t,n){"use strict"
-function r(e){return e&&e.__esModule?e:{"default":e}}function o(e){var t=e.rows,n=e.width,r=e.height,o=n,i=r,u=function(e){return Math.max(Math.min(e,c),s)},p=(0,l["default"])(t),f=p.leftmostActiveIdx,d=p.rightmostActiveIdx,h=d-f+1,v=Math.round((d+f)/2),g=u(Math.floor(o/h)),m=u(Math.floor(i/t.length)),y=Math.min(g,m),_=Math.floor(o/y),b=v-Math.floor(_/2),C=b+_-1,E=Math.floor(i/y),x=Math.max(t.length-E,0),w=t.filter(function(e,t){return t>=x}).map(function(e){return e.filter(function(e){return e>=b&&C>=e})}),M=w.map(function(e){return(0,a["default"])({startCellIdx:b,row:e})})
-return{cellSize:y,renderableRangesByRow:M}}Object.defineProperty(t,"__esModule",{value:!0}),t["default"]=o
+function r(e){return e&&e.__esModule?e:{"default":e}}function o(e){var t=e.rows,n=e.width,r=e.height,o=e.prevCenterIdx,i=n,u=r,p=function(e){return Math.max(Math.min(e,c),s)},f=(0,l["default"])(t),d=f.leftmostActiveIdx,h=f.rightmostActiveIdx,v=h-d+1,g=Math.round((h+d)/2)
+Math.abs(o-g)<Math.sqrt(t.length)&&(g=o)
+var m=p(Math.floor(i/v)),y=p(Math.floor(u/t.length)),_=Math.min(m,y),b=Math.floor(i/_),C=g-Math.floor(b/2),E=C+b-1,x=Math.floor(u/_),w=Math.max(t.length-x,0),M=t.filter(function(e,t){return t>=w}).map(function(e){return e.filter(function(e){return e>=C&&E>=e})}),R=M.map(function(e){return(0,a["default"])({startCellIdx:C,row:e})})
+return{cellSize:_,centerIdx:g,renderableRangesByRow:R}}Object.defineProperty(t,"__esModule",{value:!0}),t["default"]=o
 var i=n(159),a=r(i),u=n(160),l=r(u),s=1,c=5},function(e,t,n){"use strict"
 function r(e){return e&&e.__esModule?e:{"default":e}}function o(e){var t=e.startCellIdx,n=e.row
 return n.reduce(function(e,n){var r=n-t
