@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 
 import getRenderInfo from '../util/get-render-info'
+import getImageData from '../util/get-image-data'
 
 class Board extends Component {
 	render() {
@@ -32,23 +33,20 @@ class Board extends Component {
 			renderableRangesByRow,
 		} = getRenderInfo({ rows, width, height })
 
-		let curRowIdx = 0
-
 		ctx.clearRect(0, 0, width, height)
-		ctx.fillStyle = '#000'
 
-		renderableRangesByRow.forEach((renderableRanges, rowIdx) => {
-			renderableRanges.forEach((range) => {
-				const x = range.start * cellSize
-				const y = rowIdx * cellSize
-				const rectWidth = range.length * cellSize
-				const rectHeight = cellSize
+		if (typeof width !== 'number' ||  typeof height !== 'number') {
+			return
+		}
 
-				ctx.fillRect(x, y, rectWidth, rectHeight)
-			})
-
-			curRowIdx += 1
+		const imageData = getImageData({
+			width,
+			cellSize,
+			renderableRangesByRow,
+			imageData: ctx.createImageData(width, height),
 		})
+
+		ctx.putImageData(imageData, 0, 0)
 	}
 }
 

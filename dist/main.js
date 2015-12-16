@@ -19679,15 +19679,15 @@
 
 	var _board2 = _interopRequireDefault(_board);
 
-	var _controls = __webpack_require__(177);
+	var _controls = __webpack_require__(167);
 
 	var _controls2 = _interopRequireDefault(_controls);
 
-	var _getNextRow = __webpack_require__(186);
+	var _getNextRow = __webpack_require__(172);
 
 	var _getNextRow2 = _interopRequireDefault(_getNextRow);
 
-	var _game = __webpack_require__(182);
+	var _game = __webpack_require__(173);
 
 	var _game2 = _interopRequireDefault(_game);
 
@@ -32256,9 +32256,13 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _getRenderInfo2 = __webpack_require__(176);
+	var _getRenderInfo2 = __webpack_require__(163);
 
 	var _getRenderInfo3 = _interopRequireDefault(_getRenderInfo2);
+
+	var _getImageData = __webpack_require__(166);
+
+	var _getImageData2 = _interopRequireDefault(_getImageData);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -32315,23 +32319,20 @@
 				var cellSize = _getRenderInfo.cellSize;
 				var renderableRangesByRow = _getRenderInfo.renderableRangesByRow;
 
-				var curRowIdx = 0;
-
 				ctx.clearRect(0, 0, width, height);
-				ctx.fillStyle = '#000';
 
-				renderableRangesByRow.forEach(function (renderableRanges, rowIdx) {
-					renderableRanges.forEach(function (range) {
-						var x = range.start * cellSize;
-						var y = rowIdx * cellSize;
-						var rectWidth = range.length * cellSize;
-						var rectHeight = cellSize;
+				if (typeof width !== 'number' || typeof height !== 'number') {
+					return;
+				}
 
-						ctx.fillRect(x, y, rectWidth, rectHeight);
-					});
-
-					curRowIdx += 1;
+				var imageData = (0, _getImageData2.default)({
+					width: width,
+					cellSize: cellSize,
+					renderableRangesByRow: renderableRangesByRow,
+					imageData: ctx.createImageData(width, height)
 				});
+
+				ctx.putImageData(imageData, 0, 0);
 			}
 		}]);
 
@@ -32347,20 +32348,7 @@
 	exports.default = Board;
 
 /***/ },
-/* 163 */,
-/* 164 */,
-/* 165 */,
-/* 166 */,
-/* 167 */,
-/* 168 */,
-/* 169 */,
-/* 170 */,
-/* 171 */,
-/* 172 */,
-/* 173 */,
-/* 174 */,
-/* 175 */,
-/* 176 */
+/* 163 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -32370,11 +32358,11 @@
 	});
 	exports.default = getRenderInfo;
 
-	var _getRenderableRanges = __webpack_require__(184);
+	var _getRenderableRanges = __webpack_require__(164);
 
 	var _getRenderableRanges2 = _interopRequireDefault(_getRenderableRanges);
 
-	var _getActiveIdxsMaxima2 = __webpack_require__(185);
+	var _getActiveIdxsMaxima2 = __webpack_require__(165);
 
 	var _getActiveIdxsMaxima3 = _interopRequireDefault(_getActiveIdxsMaxima2);
 
@@ -32439,7 +32427,133 @@
 	}
 
 /***/ },
-/* 177 */
+/* 164 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = getRenderableRanges;
+
+	var _lodash = __webpack_require__(160);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function getRenderableRanges(_ref) {
+		var startCellIdx = _ref.startCellIdx;
+		var row = _ref.row;
+
+		return row.reduce(function (ranges, idx) {
+			var relativeIdx = idx - startCellIdx;
+			if (!ranges.length) {
+				return [{
+					start: relativeIdx,
+					length: 1,
+					isActive: true
+				}];
+			}
+
+			var prevRange = _lodash2.default.last(ranges);
+			var nextRangeStart = prevRange.start + prevRange.length;
+
+			if (nextRangeStart === relativeIdx) {
+				prevRange.length += 1;
+			} else {
+				ranges.push({
+					start: relativeIdx,
+					length: 1
+				});
+			}
+
+			return ranges;
+		}, []);
+	}
+
+/***/ },
+/* 165 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = getActiveIdxsMaxima;
+
+	var _lodash = __webpack_require__(160);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function getActiveIdxsMaxima(rows) {
+		var leftmostActiveIdx = _lodash2.default.first(_lodash2.default.first(rows));
+		var rightmostActiveIdx = _lodash2.default.last(_lodash2.default.first(rows));
+
+		rows.slice(1).forEach(function (row) {
+			leftmostActiveIdx = Math.min(leftmostActiveIdx, _lodash2.default.first(row));
+			rightmostActiveIdx = Math.max(rightmostActiveIdx, _lodash2.default.last(row));
+		});
+
+		return {
+			leftmostActiveIdx: leftmostActiveIdx,
+			rightmostActiveIdx: rightmostActiveIdx
+		};
+	}
+
+/***/ },
+/* 166 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = getImageData;
+	function getImageData(_ref) {
+		var imageData = _ref.imageData;
+		var renderableRangesByRow = _ref.renderableRangesByRow;
+		var width = _ref.width;
+		var cellSize = _ref.cellSize;
+		var data = imageData.data;
+
+		for (var i = 0; i < data.length; i += 4) {
+			data[i] = 255;
+			data[i + 1] = 255;
+			data[i + 2] = 255;
+			data[i + 3] = 255;
+		}
+
+		for (var rowIdx = 0; rowIdx < renderableRangesByRow.length; rowIdx++) {
+			var ranges = renderableRangesByRow[rowIdx];
+
+			for (var rangeIdx = 0; rangeIdx < ranges.length; rangeIdx++) {
+				var range = ranges[rangeIdx];
+				var rangeStartInPx = range.start * cellSize;
+				var rangeLengthInPx = range.length * cellSize;
+
+				for (var yOffset = 0; yOffset < cellSize; yOffset++) {
+					for (var xOffset = 0; xOffset < rangeLengthInPx; xOffset++) {
+						var pxIdx = (rowIdx * cellSize + yOffset) * width + rangeStartInPx + xOffset;
+						var idx = pxIdx * 4;
+						data[idx] = 0;
+						data[idx + 1] = 0;
+						data[idx + 2] = 0;
+					}
+				}
+			}
+		}
+
+		return imageData;
+	}
+
+/***/ },
+/* 167 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -32452,7 +32566,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _controls = __webpack_require__(178);
+	var _controls = __webpack_require__(168);
 
 	var _controls2 = _interopRequireDefault(_controls);
 
@@ -32534,16 +32648,16 @@
 	exports.default = Controls;
 
 /***/ },
-/* 178 */
+/* 168 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(179);
+	var content = __webpack_require__(169);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(181)(content, {});
+	var update = __webpack_require__(171)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -32560,10 +32674,10 @@
 	}
 
 /***/ },
-/* 179 */
+/* 169 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(180)();
+	exports = module.exports = __webpack_require__(170)();
 	// imports
 
 
@@ -32577,7 +32691,7 @@
 	};
 
 /***/ },
-/* 180 */
+/* 170 */
 /***/ function(module, exports) {
 
 	/*
@@ -32633,7 +32747,7 @@
 
 
 /***/ },
-/* 181 */
+/* 171 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -32887,130 +33001,7 @@
 
 
 /***/ },
-/* 182 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// style-loader: Adds some css to the DOM by adding a <style> tag
-
-	// load the styles
-	var content = __webpack_require__(183);
-	if(typeof content === 'string') content = [[module.id, content, '']];
-	// add the styles to the DOM
-	var update = __webpack_require__(181)(content, {});
-	if(content.locals) module.exports = content.locals;
-	// Hot Module Replacement
-	if(false) {
-		// When the styles change, update the <style> tags
-		if(!content.locals) {
-			module.hot.accept("!!./../node_modules/css-loader/index.js?modules!./game.css", function() {
-				var newContent = require("!!./../node_modules/css-loader/index.js?modules!./game.css");
-				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-				update(newContent);
-			});
-		}
-		// When the module is disposed, remove the <style> tags
-		module.hot.dispose(function() { update(); });
-	}
-
-/***/ },
-/* 183 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports = module.exports = __webpack_require__(180)();
-	// imports
-
-
-	// module
-	exports.push([module.id, "._2VDAUwBcB3_NLyZIrR9tZo {\n\tpadding: 10px;\n\tcolor: #555;\n\tfont-family: Helvetica, Arial;\n\tfont-size: 16px;\n\tdisplay: flex;\n\tflex-direction: column;\n\n\tposition: absolute;\n\ttop: 0;\n\tright: 0;\n\tbottom: 0;\n\tleft: 0;\n}\n\n._3YbvATxEnTSGVKNMJi-GJn {\n\tflex: 0 0 auto;\n}\n\n._1GUZfc-Xrs7j9ESI8PBJeJ {\n\tflex: 1 0 auto;\n\tborder: 1px solid #eee;\n\ttext-align:center;\n\tline-height: 50px;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button, ._2VDAUwBcB3_NLyZIrR9tZo input {\n\tdisplay: block;\n\tbox-sizing: border-box;\n\twidth: 100%;\n\tfont-family: inherit;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button {\n\tdisplay: inline-block;\n\theight: 38px;\n\tpadding: 0 30px;\n\tcolor: #555;\n\ttext-align: center;\n\tfont-size: 11px;\n\tfont-weight: 600;\n\tline-height: 38px;\n\tletter-spacing: .1rem;\n\ttext-transform: uppercase;\n\ttext-decoration: none;\n\twhite-space: nowrap;\n\tbackground-color: transparent;\n\tborder-radius: 4px;\n\tborder: 1px solid #bbb;\n\tcursor: pointer;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button:hover, ._2VDAUwBcB3_NLyZIrR9tZo button:focus {\n\tcolor: #333;\n\tborder-color: #888;\n\toutline: 0;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo .button-primary {\n\tcolor: #FFF;\n\tbackground-color: #33C3F0;\n\tborder-color: #33C3F0;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo .button-primary:focus, ._2VDAUwBcB3_NLyZIrR9tZo .button-primary:hover {\n\tcolor: #FFF;\n\tbackground-color: #1EAEDB;\n\tborder-color: #1EAEDB;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo input {\n\theight: 38px;\n\tpadding: 6px 10px;\n\tbackground-color: #fff;\n\tborder: 1px solid #D1D1D1;\n\tborder-radius: 4px;\n\tbox-shadow: none;\n\tbox-sizing: border-box;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo input:focus {\n\tborder: 1px solid #33C3F0;\n\toutline: 0;\n}\n", ""]);
-
-	// exports
-	exports.locals = {
-		"root": "_2VDAUwBcB3_NLyZIrR9tZo",
-		"controlsWrapper": "_3YbvATxEnTSGVKNMJi-GJn",
-		"boardWrapper": "_1GUZfc-Xrs7j9ESI8PBJeJ"
-	};
-
-/***/ },
-/* 184 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = getRenderableRanges;
-
-	var _lodash = __webpack_require__(160);
-
-	var _lodash2 = _interopRequireDefault(_lodash);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function getRenderableRanges(_ref) {
-		var startCellIdx = _ref.startCellIdx;
-		var row = _ref.row;
-
-		return row.reduce(function (ranges, idx) {
-			var relativeIdx = idx - startCellIdx;
-			if (!ranges.length) {
-				return [{
-					start: relativeIdx,
-					length: 1,
-					isActive: true
-				}];
-			}
-
-			var prevRange = _lodash2.default.last(ranges);
-			var nextRangeStart = prevRange.start + prevRange.length;
-
-			if (nextRangeStart === relativeIdx) {
-				prevRange.length += 1;
-			} else {
-				ranges.push({
-					start: relativeIdx,
-					length: 1
-				});
-			}
-
-			return ranges;
-		}, []);
-	}
-
-/***/ },
-/* 185 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = getActiveIdxsMaxima;
-
-	var _lodash = __webpack_require__(160);
-
-	var _lodash2 = _interopRequireDefault(_lodash);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function getActiveIdxsMaxima(rows) {
-		var leftmostActiveIdx = _lodash2.default.first(_lodash2.default.first(rows));
-		var rightmostActiveIdx = _lodash2.default.last(_lodash2.default.first(rows));
-
-		rows.slice(1).forEach(function (row) {
-			leftmostActiveIdx = Math.min(leftmostActiveIdx, _lodash2.default.first(row));
-			rightmostActiveIdx = Math.max(rightmostActiveIdx, _lodash2.default.last(row));
-		});
-
-		return {
-			leftmostActiveIdx: leftmostActiveIdx,
-			rightmostActiveIdx: rightmostActiveIdx
-		};
-	}
-
-/***/ },
-/* 186 */
+/* 172 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -33055,6 +33046,50 @@
 			return rule & ruleMask ? nextRow.concat(idx) : nextRow;
 		}, []);
 	}
+
+/***/ },
+/* 173 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(174);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(171)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../node_modules/css-loader/index.js?modules!./game.css", function() {
+				var newContent = require("!!./../node_modules/css-loader/index.js?modules!./game.css");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 174 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(170)();
+	// imports
+
+
+	// module
+	exports.push([module.id, "._2VDAUwBcB3_NLyZIrR9tZo {\n\tpadding: 10px;\n\tcolor: #555;\n\tfont-family: Helvetica, Arial;\n\tfont-size: 16px;\n\tdisplay: flex;\n\tflex-direction: column;\n\n\tposition: absolute;\n\ttop: 0;\n\tright: 0;\n\tbottom: 0;\n\tleft: 0;\n}\n\n._3YbvATxEnTSGVKNMJi-GJn {\n\tflex: 0 0 auto;\n}\n\n._1GUZfc-Xrs7j9ESI8PBJeJ {\n\tflex: 1 0 auto;\n\tborder: 1px solid #eee;\n\ttext-align:center;\n\tline-height: 50px;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button, ._2VDAUwBcB3_NLyZIrR9tZo input {\n\tdisplay: block;\n\tbox-sizing: border-box;\n\twidth: 100%;\n\tfont-family: inherit;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button {\n\tdisplay: inline-block;\n\theight: 38px;\n\tpadding: 0 30px;\n\tcolor: #555;\n\ttext-align: center;\n\tfont-size: 11px;\n\tfont-weight: 600;\n\tline-height: 38px;\n\tletter-spacing: .1rem;\n\ttext-transform: uppercase;\n\ttext-decoration: none;\n\twhite-space: nowrap;\n\tbackground-color: transparent;\n\tborder-radius: 4px;\n\tborder: 1px solid #bbb;\n\tcursor: pointer;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo button:hover, ._2VDAUwBcB3_NLyZIrR9tZo button:focus {\n\tcolor: #333;\n\tborder-color: #888;\n\toutline: 0;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo .button-primary {\n\tcolor: #FFF;\n\tbackground-color: #33C3F0;\n\tborder-color: #33C3F0;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo .button-primary:focus, ._2VDAUwBcB3_NLyZIrR9tZo .button-primary:hover {\n\tcolor: #FFF;\n\tbackground-color: #1EAEDB;\n\tborder-color: #1EAEDB;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo input {\n\theight: 38px;\n\tpadding: 6px 10px;\n\tbackground-color: #fff;\n\tborder: 1px solid #D1D1D1;\n\tborder-radius: 4px;\n\tbox-shadow: none;\n\tbox-sizing: border-box;\n}\n\n._2VDAUwBcB3_NLyZIrR9tZo input:focus {\n\tborder: 1px solid #33C3F0;\n\toutline: 0;\n}\n", ""]);
+
+	// exports
+	exports.locals = {
+		"root": "_2VDAUwBcB3_NLyZIrR9tZo",
+		"controlsWrapper": "_3YbvATxEnTSGVKNMJi-GJn",
+		"boardWrapper": "_1GUZfc-Xrs7j9ESI8PBJeJ"
+	};
 
 /***/ }
 /******/ ]);
