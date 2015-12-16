@@ -1,9 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 
-import getRenderInfo from '../util/get-render-info'
-import getImageData from '../util/get-image-data'
-
 class Board extends Component {
 	render() {
 		const { width, height } = this.props
@@ -17,34 +14,46 @@ class Board extends Component {
 	}
 
 	componentDidMount() {
-		this.updateCanvas()
+		this.worker = new Worker('dist/worker.js')
+
+		this.worker.onmessage = (event) => {
+			this.paintCanvas(event.data)
+		}
+
+		this.requestCanvasUpdate()
 	}
 
 	componentDidUpdate() {
-		this.updateCanvas()
+		this.requestCanvasUpdate()
 	}
 
-	updateCanvas() {
+	componentWillUnmount() {
+		this.worker.terminate()
+	}
+
+	requestCanvasUpdate() {
 		const canvas = ReactDOM.findDOMNode(this)
 		const ctx = canvas.getContext('2d')
 		const { rows, width, height } = this.props
-		const {
-			cellSize,
-			renderableRangesByRow,
-		} = getRenderInfo({ rows, width, height })
-
-		ctx.clearRect(0, 0, width, height)
 
 		if (typeof width !== 'number' ||  typeof height !== 'number') {
 			return
 		}
 
-		const imageData = getImageData({
+		const buffer = ctx.createImageData(width, height).data.buffer
+		this.worker.postMessage({
+			rows,
 			width,
-			cellSize,
-			renderableRangesByRow,
-			imageData: ctx.createImageData(width, height),
-		})
+			height,
+			buffer,
+		}, [buffer])
+	}
+
+	paintCanvas({ buffer, width, height }) {
+		const canvas = ReactDOM.findDOMNode(this)
+		const ctx = canvas.getContext('2d')
+		const data = new Uint8ClampedArray(buffer)
+		const imageData = new ImageData(data, width, height)
 
 		ctx.putImageData(imageData, 0, 0)
 	}

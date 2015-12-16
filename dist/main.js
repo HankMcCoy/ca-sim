@@ -34,7 +34,7 @@
 /******/ 	__webpack_require__.c = installedModules;
 
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
+/******/ 	__webpack_require__.p = "/dist";
 
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -19679,15 +19679,15 @@
 
 	var _board2 = _interopRequireDefault(_board);
 
-	var _controls = __webpack_require__(167);
+	var _controls = __webpack_require__(163);
 
 	var _controls2 = _interopRequireDefault(_controls);
 
-	var _getNextRow = __webpack_require__(172);
+	var _getNextRow = __webpack_require__(168);
 
 	var _getNextRow2 = _interopRequireDefault(_getNextRow);
 
-	var _game = __webpack_require__(173);
+	var _game = __webpack_require__(169);
 
 	var _game2 = _interopRequireDefault(_game);
 
@@ -32256,14 +32256,6 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _getRenderInfo2 = __webpack_require__(163);
-
-	var _getRenderInfo3 = _interopRequireDefault(_getRenderInfo2);
-
-	var _getImageData = __webpack_require__(166);
-
-	var _getImageData2 = _interopRequireDefault(_getImageData);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -32297,16 +32289,29 @@
 		}, {
 			key: 'componentDidMount',
 			value: function componentDidMount() {
-				this.updateCanvas();
+				var _this2 = this;
+
+				this.worker = new Worker('dist/worker.js');
+
+				this.worker.onmessage = function (event) {
+					_this2.paintCanvas(event.data);
+				};
+
+				this.requestCanvasUpdate();
 			}
 		}, {
 			key: 'componentDidUpdate',
 			value: function componentDidUpdate() {
-				this.updateCanvas();
+				this.requestCanvasUpdate();
 			}
 		}, {
-			key: 'updateCanvas',
-			value: function updateCanvas() {
+			key: 'componentWillUnmount',
+			value: function componentWillUnmount() {
+				this.worker.terminate();
+			}
+		}, {
+			key: 'requestCanvasUpdate',
+			value: function requestCanvasUpdate() {
 				var canvas = _reactDom2.default.findDOMNode(this);
 				var ctx = canvas.getContext('2d');
 				var _props2 = this.props;
@@ -32314,23 +32319,29 @@
 				var width = _props2.width;
 				var height = _props2.height;
 
-				var _getRenderInfo = (0, _getRenderInfo3.default)({ rows: rows, width: width, height: height });
-
-				var cellSize = _getRenderInfo.cellSize;
-				var renderableRangesByRow = _getRenderInfo.renderableRangesByRow;
-
-				ctx.clearRect(0, 0, width, height);
-
 				if (typeof width !== 'number' || typeof height !== 'number') {
 					return;
 				}
 
-				var imageData = (0, _getImageData2.default)({
+				var buffer = ctx.createImageData(width, height).data.buffer;
+				this.worker.postMessage({
+					rows: rows,
 					width: width,
-					cellSize: cellSize,
-					renderableRangesByRow: renderableRangesByRow,
-					imageData: ctx.createImageData(width, height)
-				});
+					height: height,
+					buffer: buffer
+				}, [buffer]);
+			}
+		}, {
+			key: 'paintCanvas',
+			value: function paintCanvas(_ref) {
+				var buffer = _ref.buffer;
+				var width = _ref.width;
+				var height = _ref.height;
+
+				var canvas = _reactDom2.default.findDOMNode(this);
+				var ctx = canvas.getContext('2d');
+				var data = new Uint8ClampedArray(buffer);
+				var imageData = new ImageData(data, width, height);
 
 				ctx.putImageData(imageData, 0, 0);
 			}
@@ -32356,217 +32367,12 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	exports.default = getRenderInfo;
-
-	var _getRenderableRanges = __webpack_require__(164);
-
-	var _getRenderableRanges2 = _interopRequireDefault(_getRenderableRanges);
-
-	var _getActiveIdxsMaxima2 = __webpack_require__(165);
-
-	var _getActiveIdxsMaxima3 = _interopRequireDefault(_getActiveIdxsMaxima2);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var minCellSize = 1;
-	var maxCellSize = 5;
-
-	function getRenderInfo(_ref) {
-		var rows = _ref.rows;
-		var width = _ref.width;
-		var height = _ref.height;
-
-		var renderWidthInPx = width;
-		var renderHeightInPx = height;
-		var constrainCellSize = function constrainCellSize(cellSize) {
-			return Math.max(Math.min(cellSize, maxCellSize), minCellSize);
-		};
-
-		// We should center the viewport at the mid-point between the leftmost and rightmost active cells.
-
-		var _getActiveIdxsMaxima = (0, _getActiveIdxsMaxima3.default)(rows);
-
-		var leftmostActiveIdx = _getActiveIdxsMaxima.leftmostActiveIdx;
-		var rightmostActiveIdx = _getActiveIdxsMaxima.rightmostActiveIdx;
-
-		var activeRangeLength = rightmostActiveIdx - leftmostActiveIdx + 1;
-		var centerIdx = Math.round((rightmostActiveIdx + leftmostActiveIdx) / 2);
-
-		// Figure out how small the cell size needs to be in order to display what we'd like to display
-		// both horizontally and vertically. We then pick the smaller of these sizes so we guarantee we
-		// display as much as of the graph as we can.
-		var horizCellSize = constrainCellSize(Math.floor(renderWidthInPx / activeRangeLength));
-		var vertCellSize = constrainCellSize(Math.floor(renderHeightInPx / rows.length));
-		var cellSize = Math.min(horizCellSize, vertCellSize);
-
-		var numCellsToDisplay = Math.floor(renderWidthInPx / cellSize);
-		var startCellIdx = centerIdx - Math.floor(numCellsToDisplay / 2);
-		var endCellIdx = startCellIdx + numCellsToDisplay - 1;
-		var numRowsToDisplay = Math.floor(renderHeightInPx / cellSize);
-		var startRowIdx = Math.max(rows.length - numRowsToDisplay, 0);
-
-		// Get the active indexes within only the viewable area
-		var displayableRows = rows.filter(function (row, rowIdx) {
-			return rowIdx >= startRowIdx;
-		}).map(function (row) {
-			return row.filter(function (cellIdx) {
-				return cellIdx >= startCellIdx && cellIdx <= endCellIdx;
-			});
-		});
-
-		// Convert them to ranges
-		var renderableRangesByRow = displayableRows.map(function (row) {
-			return (0, _getRenderableRanges2.default)({ startCellIdx: startCellIdx, row: row });
-		});
-
-		// Return the ranges with the cell display size
-		return {
-			cellSize: cellSize,
-			renderableRangesByRow: renderableRangesByRow
-		};
-	}
-
-/***/ },
-/* 164 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = getRenderableRanges;
-
-	var _lodash = __webpack_require__(160);
-
-	var _lodash2 = _interopRequireDefault(_lodash);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function getRenderableRanges(_ref) {
-		var startCellIdx = _ref.startCellIdx;
-		var row = _ref.row;
-
-		return row.reduce(function (ranges, idx) {
-			var relativeIdx = idx - startCellIdx;
-			if (!ranges.length) {
-				return [{
-					start: relativeIdx,
-					length: 1,
-					isActive: true
-				}];
-			}
-
-			var prevRange = _lodash2.default.last(ranges);
-			var nextRangeStart = prevRange.start + prevRange.length;
-
-			if (nextRangeStart === relativeIdx) {
-				prevRange.length += 1;
-			} else {
-				ranges.push({
-					start: relativeIdx,
-					length: 1
-				});
-			}
-
-			return ranges;
-		}, []);
-	}
-
-/***/ },
-/* 165 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = getActiveIdxsMaxima;
-
-	var _lodash = __webpack_require__(160);
-
-	var _lodash2 = _interopRequireDefault(_lodash);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function getActiveIdxsMaxima(rows) {
-		var leftmostActiveIdx = _lodash2.default.first(_lodash2.default.first(rows));
-		var rightmostActiveIdx = _lodash2.default.last(_lodash2.default.first(rows));
-
-		rows.slice(1).forEach(function (row) {
-			leftmostActiveIdx = Math.min(leftmostActiveIdx, _lodash2.default.first(row));
-			rightmostActiveIdx = Math.max(rightmostActiveIdx, _lodash2.default.last(row));
-		});
-
-		return {
-			leftmostActiveIdx: leftmostActiveIdx,
-			rightmostActiveIdx: rightmostActiveIdx
-		};
-	}
-
-/***/ },
-/* 166 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = getImageData;
-	function getImageData(_ref) {
-		var imageData = _ref.imageData;
-		var renderableRangesByRow = _ref.renderableRangesByRow;
-		var width = _ref.width;
-		var cellSize = _ref.cellSize;
-		var data = imageData.data;
-
-		for (var i = 0; i < data.length; i += 4) {
-			data[i] = 255;
-			data[i + 1] = 255;
-			data[i + 2] = 255;
-			data[i + 3] = 255;
-		}
-
-		for (var rowIdx = 0; rowIdx < renderableRangesByRow.length; rowIdx++) {
-			var ranges = renderableRangesByRow[rowIdx];
-
-			for (var rangeIdx = 0; rangeIdx < ranges.length; rangeIdx++) {
-				var range = ranges[rangeIdx];
-				var rangeStartInPx = range.start * cellSize;
-				var rangeLengthInPx = range.length * cellSize;
-
-				for (var yOffset = 0; yOffset < cellSize; yOffset++) {
-					for (var xOffset = 0; xOffset < rangeLengthInPx; xOffset++) {
-						var pxIdx = (rowIdx * cellSize + yOffset) * width + rangeStartInPx + xOffset;
-						var idx = pxIdx * 4;
-						data[idx] = 0;
-						data[idx + 1] = 0;
-						data[idx + 2] = 0;
-					}
-				}
-			}
-		}
-
-		return imageData;
-	}
-
-/***/ },
-/* 167 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
 
 	var _react = __webpack_require__(1);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _controls = __webpack_require__(168);
+	var _controls = __webpack_require__(164);
 
 	var _controls2 = _interopRequireDefault(_controls);
 
@@ -32648,16 +32454,16 @@
 	exports.default = Controls;
 
 /***/ },
-/* 168 */
+/* 164 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(169);
+	var content = __webpack_require__(165);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(171)(content, {});
+	var update = __webpack_require__(167)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -32674,10 +32480,10 @@
 	}
 
 /***/ },
-/* 169 */
+/* 165 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(170)();
+	exports = module.exports = __webpack_require__(166)();
 	// imports
 
 
@@ -32691,7 +32497,7 @@
 	};
 
 /***/ },
-/* 170 */
+/* 166 */
 /***/ function(module, exports) {
 
 	/*
@@ -32747,7 +32553,7 @@
 
 
 /***/ },
-/* 171 */
+/* 167 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -33001,7 +32807,7 @@
 
 
 /***/ },
-/* 172 */
+/* 168 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -33048,16 +32854,16 @@
 	}
 
 /***/ },
-/* 173 */
+/* 169 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(174);
+	var content = __webpack_require__(170);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(171)(content, {});
+	var update = __webpack_require__(167)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -33074,10 +32880,10 @@
 	}
 
 /***/ },
-/* 174 */
+/* 170 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(170)();
+	exports = module.exports = __webpack_require__(166)();
 	// imports
 
 

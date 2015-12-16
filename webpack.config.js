@@ -2,10 +2,14 @@
 'use strict'
 
 module.exports = {
-	entry: './src/main.js',
+	entry: {
+		main: './src/main.js',
+		worker: './src/worker.js',
+	},
 	output: {
+		publicPath: '/dist',
 		path: __dirname + '/dist',
-		filename: 'main.js',
+		filename: '[name].js',
 	},
 	module: {
 		loaders: [

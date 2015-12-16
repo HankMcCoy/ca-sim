@@ -4,7 +4,7 @@
   "author": "Thomas Beirne <thomas.beirne@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "webpack -w"
+    "start": "node dev-server.js"
   },
   "dependencies": {
     "jsxstyle": "0.0.18",
@@ -18,10 +18,13 @@
     "babel-loader": "^6.2.0",
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-react": "^6.3.13",
+    "cors": "~2.7.1",
     "css-loader": "~0.23.0",
     "eslint": "~1.10.3",
     "eslint-plugin-react": "~3.11.3",
+    "express": "~4.13.3",
     "style-loader": "~0.13.0",
-    "webpack": "^1.12.9"
+    "webpack": "^1.12.9",
+    "webpack-dev-middleware": "~1.4.0"
   }
 }
