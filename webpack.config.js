@@ -4,14 +4,10 @@
 const webpack = require('webpack')
 
 module.exports = {
-	entry: {
-		main: './src/main.js',
-		worker: './src/worker.js',
-	},
+	entry: './src/main.js',
 	output: {
-		publicPath: '/dist',
 		path: __dirname + '/dist',
-		filename: '[name].js',
+		filename: 'main.js',
 	},
 	module: {
 		loaders: [

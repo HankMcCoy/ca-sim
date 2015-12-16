@@ -1,9 +1,11 @@
 export default function getImageData({
-	data,
+	imageData,
 	renderableRangesByRow,
 	width,
 	cellSize,
 }) {
+	const { data } = imageData
+
 	for (let i = 0; i < data.length; i += 4) {
 		data[i] = 255
 		data[i + 1] = 255
@@ -32,5 +34,5 @@ export default function getImageData({
 		}
 	}
 
-	return data
+	return imageData
 }
