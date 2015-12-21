@@ -33,11 +33,14 @@ app.get('/', (req, res) => {
 	res.send(
 `
 <!doctype html>
-<style>
-	html { height: 100%; }
-	body { margin: 0; height: 100%; }
-	.rule110-container { position: relative; height: 100%; }
-</style>
+<head>
+	<meta name="viewport" width="device-width">
+	<style>
+		html { height: 100%; }
+		body { margin: 0; height: 100%; }
+		.rule110-container { position: relative; height: 100%; }
+	</style>
+</head>
 <div class="rule110-container"></div>
 <script src="${scriptSrc}"></script>
 `
