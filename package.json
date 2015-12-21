@@ -4,13 +4,15 @@
   "author": "Thomas Beirne <thomas.beirne@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node dev-server.js"
+    "start": "NODE_ENV=production node server.js"
+    "build": "NODE_ENV=production webpack",
+    "debug": "NODE_ENV=debug node server.js",
   },
   "dependencies": {
-    "jsxstyle": "0.0.18",
-    "lodash": "^3.10.1",
-    "react": "^0.14.3",
-    "react-dom": "^0.14.3"
+    "express": "~4.13.3",
+    "lodash": "~3.10.1",
+    "react": "~0.14.3",
+    "react-dom": "~0.14.3"
   },
   "devDependencies": {
     "babel-core": "^6.3.15",
@@ -22,7 +24,6 @@
     "css-loader": "~0.23.0",
     "eslint": "~1.10.3",
     "eslint-plugin-react": "~3.11.3",
-    "express": "~4.13.3",
     "style-loader": "~0.13.0",
     "webpack": "^1.12.9",
     "webpack-dev-middleware": "~1.4.0"
