@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
 `
 <!doctype html>
 <head>
-	<meta name="viewport" width="device-width">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style>
 		html { height: 100%; }
 		body { margin: 0; height: 100%; }
