@@ -5,7 +5,7 @@ const express = require('express')
 
 const app = express()
 
-const host = 'localhost'
+const host = '0.0.0.0'
 const port = parseInt(process.env.PORT, 10) || 3000
 let scriptSrc
 
